@@ -8,11 +8,14 @@ case object DogLeggedly extends Movement
 case object Castle extends SpecialMove
 case object Launch extends SpecialMove
 
-case class CanMove[M <: Movement](m: M, p: Piece) {
+case class CanMove[M >: Movement](m: M, p: Piece) {
   var dist = 1
   def towards(o: Orientation): Boolean = {
-    p.role match {
-      case Pawn => dist == 1 && o.equals(opposite of p.colour)
+    m match {
+      case Straight => p.role match {
+        case Pawn => dist == 1 && o.equals(opposite of p.colour)
+        case _ => false
+      }
       case _ => false
     }
   }

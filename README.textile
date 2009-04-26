@@ -1,1 +1,7 @@
-h1. Work in progress
+h1. ScalaChess - a chess app in scala, one day. 
+
+This is a work in progress.
+
+h2. Building
+
+The project should be built with "Simple Build Tool":http://code.google.com/p/simple-build-tool/

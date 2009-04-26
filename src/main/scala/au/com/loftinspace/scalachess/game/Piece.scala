@@ -36,6 +36,6 @@ class Piece(val colour: Colour, val role: Role, val position: Position) {
     case Captured => None
   }
 
-  def can[M <: SpecialMove](m: M) = canMove(m)
-  def canMove[M <: Movement](m: M): CanMove[M] = CanMove(m, this)
+  def can[M >: SpecialMove](m: M) = canMove(m)
+  def canMove[M >: Movement](m: M): CanMove[M] = CanMove(m, this)
 }
