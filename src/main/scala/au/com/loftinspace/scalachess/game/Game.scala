@@ -1,18 +1,33 @@
 package au.com.loftinspace.scalachess.game
 
+import scala.util.matching.Regex
+
 class Game {
-    var pieces = Set[Piece]()
+  private val CoordinatePattern = new Regex("^[a-h][1-8]$")
 
-    def includeIn_:[P <: Piece](piece: P): Unit = {
-        piece.game = this
-        pieces += piece
-    }
+  private val pieces: Array[Option[Piece]] = new Array[Option[Piece]](64).map((op: Option[Piece]) => None)
 
-    class Placement {
-//        def at(s: Symbol): Unit = { // to_be: Option[Piece] = {
-//            val p = s.asPosition()
-//            println("Placing unknown piece at " + p.column + ", " + p.row)
-//        }
+  def place(p: Piece) = new Placement(p)
+  case class Placement(p: Piece) {
+    def at(s: Symbol): Option[Piece] = {
+      validateCoordinate(s)
+      val index = arrayIndexForSymbol(s)
+      val oldPiece = pieces(index)
+      val oldIndex = pieces.findIndexOf((anOption: Option[Piece]) => anOption equals Some(p))
+      if (oldIndex >= 0) pieces(oldIndex) = None
+      pieces(index) = Some(p)
+      oldPiece
     }
-    def place(c: Colour, r: Role) = new Placement
+  }
+
+  def pieceAt(s: Symbol):Option[Piece] = {
+    validateCoordinate(s)
+    pieces(arrayIndexForSymbol(s))
+  }
+
+  private def validateCoordinate(coord: Symbol) = if (coord == null || CoordinatePattern.findFirstIn(coord.name).equals(None)) throw new IllegalArgumentException("Invalid coordinate: " + coord)
+  private def arrayIndexForSymbol(s: Symbol): Int = ((s.name.charAt(0).asDigit - 10) * 8) + (s.name.charAt(1).asDigit - 1)
+
+  // todo - get rid of this!
+  def includeIn_:[P <: Piece](piece: P): Unit = {}
 }

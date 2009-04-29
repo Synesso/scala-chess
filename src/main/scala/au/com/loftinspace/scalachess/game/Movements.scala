@@ -13,7 +13,7 @@ case class CanMove[M >: Movement](m: M, p: Piece) {
   def towards(o: Orientation): Boolean = {
     m match {
       case Straight => p.role match {
-        case Pawn => dist == 1 && o.equals(opposite of p.colour)
+        case Pawn => dist == 1 && o.equals(p.opposingColour)
         case _ => false
       }
       case _ => false

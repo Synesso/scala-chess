@@ -24,18 +24,22 @@ object opposite {
   }
 }
 
-class Piece(val colour: Colour, val role: Role, val position: Position) {
-  def this(c: Colour, r: Role, col: Int, row: Int) = this(c, r, new InPosition(col, row))
+class Piece(val colour: Colour, val role: Role) {
 
   val ColumnLabels = "abcdefgh".toCharArray
+  var position: Position = null
   var game: Game = null
 
+  def opposingColour = opposite of colour
+  // todo - conver to symbol, if needed
   def location: Option[String] =
-  position match {
-    case InPosition(c, r) => Some(ColumnLabels.charAt(c-1).toString + r)
-    case Captured => None
-  }
+    position match {
+      case InPosition(c, r) => Some(ColumnLabels.charAt(c-1).toString + r)
+      case Captured => None
+    }
 
   def can[M >: SpecialMove](m: M) = canMove(m)
   def canMove[M >: Movement](m: M): CanMove[M] = CanMove(m, this)
+
+  override def toString = colour + " " + role
 }
