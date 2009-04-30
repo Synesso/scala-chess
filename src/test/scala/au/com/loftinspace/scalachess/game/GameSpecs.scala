@@ -41,9 +41,19 @@ object GameSpec extends Specification with SystemContexts {
     }
 
     "reject any attempt to check a piece at a non-coordinate".withA(game) { game =>
-      game pieceAt 'a0 must throwA[IllegalArgumentException]
-      game pieceAt 'harvey must throwA[IllegalArgumentException]
-      game pieceAt null must throwA[IllegalArgumentException]
+      game pieceAt 'a0 must throwAn[IllegalArgumentException]
+      game pieceAt 'harvey must throwAn[IllegalArgumentException]
+      game pieceAt null must throwAn[IllegalArgumentException]
+    }
+
+    "reject any attempt to place a piece at a non-coordinate".withA(game) { game =>
+      val king = new Piece(Black, King)
+      game place king at 'e0 must throwAn[IllegalArgumentException]
+      game place king at 'fruit must throwAn[IllegalArgumentException]
+      game place king at null must throwAn[IllegalArgumentException]
+    }
+
+    "reset and replace the pieces on the board to the starting positions".withA(game) { game =>
     }
   }
 }
