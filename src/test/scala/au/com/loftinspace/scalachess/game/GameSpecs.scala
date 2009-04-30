@@ -1,6 +1,7 @@
 package au.com.loftinspace.scalachess.game
 
 import org.specs._
+import Positioning._
 
 object GameSpec extends Specification with SystemContexts {
 
@@ -15,6 +16,7 @@ object GameSpec extends Specification with SystemContexts {
       } yield Symbol(file.toString + row)
       allCoordinates.foreach { coord =>
         game place pawn at coord must beNone
+        pawn.position must_== position(coord)
       }
     }
 
@@ -54,6 +56,14 @@ object GameSpec extends Specification with SystemContexts {
     }
 
     "reset and replace the pieces on the board to the starting positions".withA(game) { game =>
+      val pieces = Rook :: Bishop :: Knight :: Queen :: King :: Knight :: Bishop :: Rook :: Nil
+      game.reset
+      game.debug
+      val coords = for (index <- 1 to 8) yield Tuple2(Symbol("a" + index), new Piece(White, pieces(index-1))) 
+      for (coord <- coords) { 
+        println(coord._1 + " == " + coord._2 + "?")
+        game pieceAt coord._1 must beSome[Piece].which(_ == coord._2) } 
+
     }
   }
 }
