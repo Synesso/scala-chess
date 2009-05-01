@@ -63,7 +63,6 @@ object GameSpec extends Specification with SystemContexts {
       for (coord <- coords) { 
         println(coord._1 + " == " + coord._2 + "?")
         game pieceAt coord._1 must beSome[Piece].which(_ == coord._2) } 
-
     }
   }
 }

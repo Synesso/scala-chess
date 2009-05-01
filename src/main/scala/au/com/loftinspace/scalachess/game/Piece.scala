@@ -26,7 +26,7 @@ object opposite {
 
 class Piece(val colour: Colour, val role: Role) {
 
-  var position: Position = null
+  var position: Option[Position] = None
 
   def opposingColour = opposite of colour
 

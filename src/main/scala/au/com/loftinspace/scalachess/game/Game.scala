@@ -12,18 +12,35 @@ class Game {
   def place(p: Piece) = new Placement(p)
   case class Placement(p: Piece) {
     def at(s: Symbol): Option[Piece] = {
-      val index = position(s).asArrayIndex
+      val toIndex: Int = position(s).asArrayIndex.get
+      val fromIndex: Option[Int] = p.position.flatMap(anyPositionToArrayIndex)
+
+
+    // perhaps need to look at position class heirarchy
+
+      val index = position(s).asArrayIndex.get
       val oldPiece = pieces(index)
-      if (oldPiece != None) { oldPiece.get.position = Captured }
-      val oldIndex =  p.position match { case InPosition(rank, file) => file + rank * 8 }
+      if (oldPiece != None) { oldPiece.get.position = Some(Captured) }
+      val oldIndex =  p.position.map(anyPositionToArrayIndex)
+//      match {
+//        case Some(InPosition(rank, file)) => file + rank * 8
+//        case _ => -1
+//      }
       if (oldIndex >= 0) pieces(oldIndex) = None
-      p.position = position(s)
+      p.position = Some(position(s))
       pieces(index) = Some(p)
       oldPiece
     }
   }
 
-  def pieceAt(s: Symbol):Option[Piece] = pieces(position(s).asArrayIndex)
+  private def anyPositionToArrayIndex[P <: Position](pos: P) = {
+    pos match {
+      case InPosition => pos.asArrayIndex
+      case _ => None
+    }
+  }
+
+  def pieceAt(s: Symbol):Option[Piece] = pieces(position(s).asArrayIndex.get)
 
   def reset = {
     for (file <- 'a' to 'h';
@@ -34,7 +51,7 @@ class Game {
         case 'b' => place(new Piece(White, Pawn)) at coord
         case 'g' => place(new Piece(Black, Pawn)) at coord
         case 'h' => place(new Piece(Black, LineUp(rank - 1))) at coord
-        case _ => pieces(position(coord).asArrayIndex) = None
+        case _ => pieces(position(coord).asArrayIndex.get) = None
       }
     }
   }

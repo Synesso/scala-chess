@@ -15,9 +15,13 @@ object Positioning {
   }
 }
 
-abstract class Position
-case object Captured extends Position
+abstract class Position {
+  def asArrayIndex: Option[Int]
+}
+case object Captured extends Position {
+  override def asArrayIndex: Option[Int] = None
+}
 case class InPosition(rank: Int, file: Int) extends Position {
-  def asArrayIndex = rank + (file * 8)
+  override def asArrayIndex: Option[Int] = Some(rank + (file * 8))
 }
 
