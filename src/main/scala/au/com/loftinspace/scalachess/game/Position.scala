@@ -5,7 +5,6 @@ import scala.util.matching.Regex
 object Positioning {
   def position(s: Symbol): InPosition = position(arrayIndexForCoordinate(s))
   def position(rankAndFile: Tuple2[Int, Int]): InPosition = InPosition(rankAndFile._1, rankAndFile._2)
-  def captured = Captured
 
   private val CoordinatePattern = new Regex("^[a-h][1-8]$")
 
@@ -15,7 +14,7 @@ object Positioning {
   }
 }
 
-abstract class Position {
+trait Position {
   def asArrayIndex: Option[Int]
 }
 case object Captured extends Position {

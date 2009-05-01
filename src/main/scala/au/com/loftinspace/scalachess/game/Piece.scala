@@ -24,7 +24,7 @@ object opposite {
   }
 }
 
-class Piece(val colour: Colour, val role: Role) {
+case class Piece(colour: Colour, role: Role) {
 
   var position: Option[Position] = None
 
