@@ -8,19 +8,29 @@ class Game {
   private val LineUp = Rook :: Bishop :: Knight :: Queen :: King :: Knight :: Bishop :: Rook :: Nil
 
   private val pieces: Array[Option[Piece]] = new Array[Option[Piece]](64).map((op: Option[Piece]) => None)
+  private var piecesCaptured: List[Piece] = Nil
+  def capturedPieces = piecesCaptured
 
   def place(p: Piece) = new Placement(p)
   case class Placement(p: Piece) {
     def at(s: Symbol): Option[Piece] = {
-      val toPosition: InPosition = position(s)
-      val toIndex: Int = toPosition.asArrayIndex.get
+//        if (!canMove) throw new IllegalMoveException("Attempt to move " + p + " to " + s + " is not valid")
+
+      val destination: InPosition = position(s)
+      p canMoveTo destination given Game.this
+      val toIndex: Int = destination.asArrayIndex.get
       val fromIndex: Option[Int] = p.position.flatMap(anyPositionToArrayIndex)
       val captured: Option[Piece] = pieces(toIndex)
-      captured.foreach{(cap: Piece) => cap.position = Some(Captured)}
-      p.position = Some(toPosition)
+      captured.foreach{(cap: Piece) => 
+        cap.position = Some(Captured)
+        piecesCaptured = cap :: piecesCaptured
+      }
+      p.position = Some(destination)
       pieces(toIndex) = Some(p)
       fromIndex.foreach{(index: Int) => pieces(index) = None}
       captured
+
+
     }
   }
 

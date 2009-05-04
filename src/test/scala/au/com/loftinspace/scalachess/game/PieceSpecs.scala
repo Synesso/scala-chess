@@ -3,7 +3,61 @@ package au.com.loftinspace.scalachess.game
 import org.specs._
 import org.scalacheck.Prop._
 
-object PieceSpec extends Specification with ScalaCheck {
+object PieceSpec extends Specification with SystemContexts {
+
+  "a piece that is taken" should {
+    val takenPiece = systemContext {
+      val game = new Game
+      val blackQueen = Piece(Black, Queen)
+      val whiteQueen = Piece(White, Queen)
+      game place whiteQueen at 'e5
+      game place blackQueen at 'e5
+      Tuple3(game, blackQueen, whiteQueen)
+    }
+
+    "have a position of 'captured'".withA(takenPiece) { scenario =>
+      scenario._3.position must beSome[Position].which(_ == Captured)
+    }
+  }
+
+  "a pawn at the start of a game" should {
+    val newGame = systemContext {
+      val game = new Game
+      game.reset
+      game
+    }
+
+    "be able to move one space forward".withA(newGame) { game =>
+      for (file <- 1 to 8) {
+        val whitePawn = (game pieceAt Symbol("b" + file)).get
+        val blackPawn = (game pieceAt Symbol("g" + file)).get
+        game place whitePawn at Symbol("c" + file)
+        game place blackPawn at Symbol("f" + file)
+      }
+    }
+
+    "be able to move two spaces forward".withA(newGame) { game =>
+      for (file <- 1 to 8) {
+        val whitePawn = (game pieceAt Symbol("b" + file)).get
+        val blackPawn = (game pieceAt Symbol("g" + file)).get
+        game place whitePawn at Symbol("d" + file)
+        game place blackPawn at Symbol("e" + file)
+      }
+    }
+
+    "not be able to move to any other square".withA(newGame) { game =>
+      for (file <- 1 to 8) {
+        for (toRank <- 'a' to 'h';
+             toFile <- 1 to 8;
+             if (toFile != file || (toRank != 'c' && toRank != 'd'))) {
+          game.reset
+          val whitePawn = (game pieceAt Symbol("b" + file)).get
+          game place whitePawn at Symbol(toRank.toString + toFile) must throwAn[IllegalMoveException]
+        }
+      }
+    }
+  }
+}
 //  implicit def enableInteger(i: Int) = new IntegerEnabler(i)
 //
 //  "any piece that is not taken" should {
@@ -78,14 +132,14 @@ object PieceSpec extends Specification with ScalaCheck {
 //    }
 //  }
 
-  //    "be able to take diagonally towards opposite colour" in {}
+//    "be able to take diagonally towards opposite colour" in {}
 
-  //    "be able to move two squares towards opposite colour ('launch') on its first move" in {
-  //
-  //    }
+//    "be able to move two squares towards opposite colour ('launch') on its first move" in {
+//
+//    }
 
-  //    "not be able to move one square towards opposite colour when blocked" in {
-  //      //            new Piece(Black, Pawn, 4, 5) includeIn_:
-  //      //            pawn canMove Straight towards Black must beFalse
-  //    }
-}
+//    "not be able to move one square towards opposite colour when blocked" in {
+//      //            new Piece(Black, Pawn, 4, 5) includeIn_:
+//      //            pawn canMove Straight towards Black must beFalse
+//    }
+//}

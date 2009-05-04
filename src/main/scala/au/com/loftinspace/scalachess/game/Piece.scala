@@ -31,4 +31,6 @@ case class Piece(colour: Colour, role: Role) {
   def opposingColour = opposite of colour
 
   override def toString = colour + " " + role
+
+  def canMoveTo(destination: InPosition) = MovementQuery(this, position, destination)
 }

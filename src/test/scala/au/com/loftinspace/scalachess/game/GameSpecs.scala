@@ -68,7 +68,16 @@ object GameSpec extends Specification with SystemContexts {
         game pieceAt Symbol("g"+i) must beSome[Piece].which(_ == Piece(Black, Pawn))
         game pieceAt Symbol("h"+i) must beSome[Piece].which(_ == Piece(Black, pieces(i-1)))
       }
+    }
 
+    "keep a record of the taken pieces".withA(game) { game =>
+      val rook = Piece(Black, King)
+      val bishop = Piece(White, Bishop)
+      game place rook at 'f8
+      game place bishop at 'f8
+      game.capturedPieces must contain(rook)
+      game.capturedPieces must notContain(bishop)
+      game.capturedPieces must haveSize(1)
     }
   }
 }
