@@ -14,34 +14,40 @@ class Game {
   def place(p: Piece) = new Placement(p)
   case class Placement(p: Piece) {
     def at(s: Symbol): Option[Piece] = {
-//        if (!canMove) throw new IllegalMoveException("Attempt to move " + p + " to " + s + " is not valid")
-
-      val destination: InPosition = position(s)
+      val destination: Position = position(s)
       p canMoveTo destination given Game.this
       val toIndex: Int = destination.asArrayIndex.get
-      val fromIndex: Option[Int] = p.position.flatMap(anyPositionToArrayIndex)
+      val fromIndex: Option[Int] = p.position.flatMap(_.asArrayIndex)
       val captured: Option[Piece] = pieces(toIndex)
       captured.foreach{(cap: Piece) => 
-        cap.position = Some(Captured)
+        cap.captured = true
         piecesCaptured = cap :: piecesCaptured
       }
       p.position = Some(destination)
       pieces(toIndex) = Some(p)
       fromIndex.foreach{(index: Int) => pieces(index) = None}
       captured
-
-
     }
   }
 
-  private def anyPositionToArrayIndex(pos: Position) = {
-    pos match {
-      case InPosition(rank, file) => pos.asArrayIndex
-      case _ => None
+  def findMovesFor(p: Piece): Set[Position] = {
+    if (!p.isInPlay) return Set()
+//    val position = p.position.get
+    p match {
+//      case Piece(colour, role) => {
+//          role match {
+//            case Pawn => {
+//                Set(position | p.opposingColour, position | p.opposingColour * 2)
+//            }
+//            case _ => Set()
+//          }
+//      }
+      case _ => Set()
     }
   }
 
   def pieceAt(s: Symbol):Option[Piece] = pieces(position(s).asArrayIndex.get)
+  def pieceAt(rank: Int, file: Int):Option[Piece] = pieces((rank - 1) + (file - 1) * 8)
 
   def reset = {
     for (file <- 'a' to 'h';

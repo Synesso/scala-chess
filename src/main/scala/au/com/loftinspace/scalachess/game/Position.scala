@@ -3,8 +3,8 @@ package au.com.loftinspace.scalachess.game
 import scala.util.matching.Regex
 
 object Positioning {
-  def position(s: Symbol): InPosition = position(arrayIndexForCoordinate(s))
-  def position(rankAndFile: Tuple2[Int, Int]): InPosition = InPosition(rankAndFile._1, rankAndFile._2)
+  def position(s: Symbol): Position = position(arrayIndexForCoordinate(s))
+  def position(rankAndFile: Tuple2[Int, Int]): Position = Position(rankAndFile._1, rankAndFile._2)
 
   private val CoordinatePattern = new Regex("^[a-h][1-8]$")
 
@@ -14,19 +14,15 @@ object Positioning {
   }
 }
 
-trait Position {
-  def asArrayIndex: Option[Int]
-  def >>(p: Position): Movement
-}
+case class Position(rank: Int, file: Int) {
+  def asArrayIndex: Option[Int] = Some(rank + (file * 8))
+  def ^(n: Int): Option[Position] = if (rank + n <= 8) Some(Position(rank + n, file)) else None
+  def v(n: Int): Option[Position] = if (rank - n >= 1) Some(Position(rank - n, file)) else None
+  def <(n: Int): Option[Position] = if (file + n <= 8) Some(Position(rank, file + n)) else None
+  def >(n: Int): Option[Position] = if (file - n >= 1) Some(Position(rank, file - n)) else None
 
-case object Captured extends Position {
-  override def asArrayIndex: Option[Int] = None
-  override def >>(p: Position) = Movement(Nil, Set.empty, "when captured")
-}
-
-case class InPosition(rank: Int, file: Int) extends Position {
-  override def asArrayIndex: Option[Int] = Some(rank + (file * 8))
-  override def >>(p: Position) = {
+  /*
+  def >>(p: Position) = {
     p match {
       case InPosition(toRank, toFile) => {
         def fileStep: Int = if (file > toFile) -1 else 1
@@ -47,4 +43,5 @@ case class InPosition(rank: Int, file: Int) extends Position {
       case _ => Movement(Nil, Set.empty, "when not yet on the board")
     }
   }
+  */
 }

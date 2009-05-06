@@ -15,8 +15,8 @@ object PieceSpec extends Specification with SystemContexts {
       Tuple3(game, blackQueen, whiteQueen)
     }
 
-    "have a position of 'captured'".withA(takenPiece) { scenario =>
-      scenario._3.position must beSome[Position].which(_ == Captured)
+    "be marked as captured".withA(takenPiece) { scenario =>
+      scenario._3.captured must beTrue
     }
   }
 
@@ -27,15 +27,26 @@ object PieceSpec extends Specification with SystemContexts {
       game
     }
 
-    "be able to move one space forward".withA(newGame) { game =>
-      for (file <- 1 to 8) {
-        val whitePawn = (game pieceAt Symbol("b" + file)).get
-        val blackPawn = (game pieceAt Symbol("g" + file)).get
-        game place whitePawn at Symbol("c" + file)
-        game place blackPawn at Symbol("f" + file)
+    "be able to move either one or two spaces towards opposite colour".withA(newGame) { game =>
+      for (file <- List(2, 7); rank <- 1 to 8) {
+        val pawn = (game pieceAt (rank, file)).get
+        val direction = if (file == 2) 1 else -1
+        game findMovesFor pawn must containAll(Set(
+          Position(rank, file + direction),
+          Position(rank, file + direction*2)))
       }
     }
 
+//    "be able to move one space forward".withA(newGame) { game =>
+//      for (file <- 1 to 8) {
+//        val whitePawn = (game pieceAt Symbol("b" + file)).get
+//        val blackPawn = (game pieceAt Symbol("g" + file)).get
+//        game place whitePawn at Symbol("c" + file)
+//        game place blackPawn at Symbol("f" + file)
+//      }
+//    }
+
+    /*
     "be able to move two spaces forward".withA(newGame) { game =>
       for (file <- 1 to 8) {
         val whitePawn = (game pieceAt Symbol("b" + file)).get
@@ -56,6 +67,7 @@ object PieceSpec extends Specification with SystemContexts {
         }
       }
     }
+    */
   }
 }
 //  implicit def enableInteger(i: Int) = new IntegerEnabler(i)
