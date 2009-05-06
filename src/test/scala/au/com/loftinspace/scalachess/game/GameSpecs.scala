@@ -8,6 +8,7 @@ object GameSpec extends Specification with SystemContexts {
   "a game" should {
     val game = systemContext{ new Game }
 
+    /*
     "allow a piece to be placed anywhere on the board".withA(game) { game =>
       val pawn = Piece(White, Pawn)
       val allCoordinates = for {
@@ -19,6 +20,7 @@ object GameSpec extends Specification with SystemContexts {
         pawn.position must_== Some(position(coord))
       }
     }
+    */
 
     "report what piece is at any coordinate".withA(game) { game =>
       val pawn = Piece(Black, Pawn)
@@ -27,6 +29,7 @@ object GameSpec extends Specification with SystemContexts {
       game pieceAt 'f6 must beNone
     }
 
+    /*
     "have no more than one reference to the same piece".withA(game) { game =>
       val pawn = Piece(Black, Pawn)
       game place pawn at 'd7
@@ -34,6 +37,7 @@ object GameSpec extends Specification with SystemContexts {
       game pieceAt 'd7 must beNone
       game pieceAt 'd6 must beSome[Piece].which(_.equals(pawn))
     }
+    */
 
     "provide the taken piece, if any, when a move is made".withA(game) { game =>
       val queen = Piece(Black, Queen)

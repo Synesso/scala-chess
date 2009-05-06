@@ -1,13 +1,15 @@
 package au.com.loftinspace.scalachess.game
 
 
-case class MovementQuery(p: Piece, fromOption: Option[Position], to: InPosition) {
+case class MovementQuery(p: Piece, fromOption: Option[Position], to: Position) {
   def given(g: Game): Unit = {
     if (fromOption.isEmpty) return
     val from = fromOption.get
-    val movement = from >> to
-    if (!movement.candidates.contains(p.role))
-      throw new IllegalMoveException(p.role.toString + "s cannot move " + movement.description)
+//    if (p.captured) throw new IllegalMoveException("Captured pieces cannot be moved")
+//    if (from equals to) throw new IllegalMoveException("Piece would not be moved")
+//    val movement = from >> to
+//    if (!movement.candidates.contains(p.role))
+//      throw new IllegalMoveException(p.role.toString + "s cannot move " + movement.description)
 
     // todo - what direction are they moving towards?
     // todo - how far? (pawn launch)
@@ -20,4 +22,4 @@ case class MovementQuery(p: Piece, fromOption: Option[Position], to: InPosition)
   }
 }
 
-case class Movement(traversal: Seq[InPosition], candidates: Set[Role], description: String)
+case class Movement(traversal: Seq[Position], candidates: Set[Role], description: String)
