@@ -32,17 +32,18 @@ class Game {
 
   def findMovesFor(p: Piece): Set[Position] = {
     if (!p.isInPlay) return Set()
-//    val position = p.position.get
+    val position = p.position.get
+println("It's a " + p)
     p match {
-//      case Piece(colour, role) => {
-//          role match {
-//            case Pawn => {
-//                Set(position | p.opposingColour, position | p.opposingColour * 2)
-//            }
-//            case _ => Set()
-//          }
-//      }
-      case _ => Set()
+      case Piece(colour, role) => {
+        role match {
+          case Pawn => {
+            val moveForwardBy = position.^_ // if (colour.equals(White)) position.^_ else position.v_
+            Set(moveForwardBy(1), moveForwardBy(2)).filter(optP => optP.isDefined).map(_.get)
+          }
+          case _ => Set()
+        }
+      }
     }
   }
 
