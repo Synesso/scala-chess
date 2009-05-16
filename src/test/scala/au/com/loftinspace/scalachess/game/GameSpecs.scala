@@ -49,7 +49,6 @@ object GameSpec extends Specification with SystemContexts {
     "reject any attempt to check a piece at a non-coordinate".withA(game) { game =>
       game pieceAt 'a0 must throwAn[IllegalArgumentException]
       game pieceAt 'harvey must throwAn[IllegalArgumentException]
-      game pieceAt null must throwAn[IllegalArgumentException]
     }
 
     "reject any attempt to place a piece at a non-coordinate".withA(game) { game =>

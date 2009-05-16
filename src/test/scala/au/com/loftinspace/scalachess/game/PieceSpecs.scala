@@ -2,6 +2,7 @@ package au.com.loftinspace.scalachess.game
 
 import org.specs._
 import org.scalacheck.Prop._
+import Positioning._
 
 object PieceSpec extends Specification with SystemContexts {
 
@@ -21,19 +22,17 @@ object PieceSpec extends Specification with SystemContexts {
   }
 
   "a pawn at the start of a game" should {
-    val newGame = systemContext {
-      val game = new Game
-      game.reset
-      game
-    }
+    val newGame = systemContext {new Game}
 
     "be able to move either one or two spaces towards opposite colour".withA(newGame) { game =>
-      for (file <- List(2, 7); rank <- 1 to 8) {
-        val pawn = (game pieceAt (rank, file)).get
-        val direction = if (file == 2) 1 else -1
-        game findMovesFor pawn must containAll(Set(
-          Position(rank, file + direction),
-          Position(rank, file + direction*2)))
+      val pawnsLocs = for (file <- 'a' to 'h'; rank <- List('2', '7')) yield position(Symbol(file.toString + rank))
+      pawnsLocs.foreach { loc =>
+        println("Getting piece at " + loc)
+        val pawn = (game pieceAt loc).get
+        println("... it is " + pawn)
+        val direction = if (loc.rank == 2) 1 else -1
+        val expected = Set(loc ^ direction, loc ^ direction*2)
+        game findMovesFor pawn must containAll(expected)
       }
     }
 

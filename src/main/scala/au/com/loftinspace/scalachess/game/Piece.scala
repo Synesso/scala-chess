@@ -29,7 +29,7 @@ case class Piece(colour: Colour, role: Role) {
   var position: Option[Position] = None
 
   def opposingColour = opposite of colour
-  def canMoveTo(destination: Position) = MovementQuery(this, position, destination)
+//  def canMoveTo(destination: Position) = MovementQuery(this, position, destination)
   def isInPlay = position.isDefined && !captured
 
   override def toString = colour + " " + role

@@ -10,16 +10,17 @@ object Positioning {
 
   private def arrayIndexForCoordinate(s: Symbol) = {
     if (s == null || CoordinatePattern.findFirstIn(s.name).equals(None)) throw new IllegalArgumentException("Invalid coordinate: " + s)
-    ((s.name.charAt(0).asDigit - 10), (s.name.charAt(1).asDigit - 1))
+    ((s.name.charAt(1).asDigit - 1), (s.name.charAt(0).asDigit - 10))
   }
 }
 
 case class Position(rank: Int, file: Int) {
-  def asArrayIndex: Option[Int] = Some(rank + (file * 8))
-  def ^(n: Int): Option[Position] = if (rank + n <= 8) Some(Position(rank + n, file)) else None
-  def <(n: Int): Option[Position] = if (file + n <= 8) Some(Position(rank, file + n)) else None
-  def v(n: Int) = ^(n * -1)
-  def >(n: Int) = <(n * -1)
+  def asArrayIndex = rank + (file * 8)
+  def ^(n: Int): Option[Position] = if (rank + n <= 7) Some(Position(rank + n, file)) else None
+  def >(n: Int): Option[Position] = if (file + n <= 7) Some(Position(rank, file + n)) else None
+  def v(n: Int): Option[Position] = if (rank - n >= 0) Some(Position(rank - n, file)) else None
+  def <(n: Int): Option[Position] = if (file - n >= 0) Some(Position(rank, file - n)) else None
+  override def toString = (97 + file).toChar.toString + (rank + 1)
 
   /*
   def >>(p: Position) = {
