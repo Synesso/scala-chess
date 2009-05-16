@@ -27,11 +27,9 @@ object PieceSpec extends Specification with SystemContexts {
     "be able to move either one or two spaces towards opposite colour".withA(newGame) { game =>
       val pawnsLocs = for (file <- 'a' to 'h'; rank <- List('2', '7')) yield position(Symbol(file.toString + rank))
       pawnsLocs.foreach { loc =>
-        println("Getting piece at " + loc)
         val pawn = (game pieceAt loc).get
-        println("... it is " + pawn)
-        val direction = if (loc.rank == 2) 1 else -1
-        val expected = Set(loc ^ direction, loc ^ direction*2)
+        val direction = if (loc.rank.equals(2)) 1 else -1
+        val expected = Set(loc ^ direction, loc ^ direction*2).map(_.get)
         game findMovesFor pawn must containAll(expected)
       }
     }

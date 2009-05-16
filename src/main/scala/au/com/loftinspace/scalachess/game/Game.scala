@@ -16,8 +16,8 @@ class Game {
 
   def place(p: Piece) = new Placement(p)
   case class Placement(p: Piece) {
-    def at(s: Symbol): Option[Piece] = {
-      val destination: Position = position(s)
+    def at(s: Symbol): Option[Piece] = at(position(s))
+    def at(destination: Position): Option[Piece] = {
       val captured: Option[Piece] = pieces(destination)
       captured.foreach{(cap: Piece) => 
         cap.captured = true
@@ -31,21 +31,19 @@ class Game {
   }
 
   def findMovesFor(p: Piece): Set[Position] = {
-    println("working on ... " + p)
     if (!p.isInPlay) return Set()
-    println("is in play")
     val position = p.position.get
-    println("It's a " + p)
     p match {
       case Piece(colour, role) => {
-        role match {
-          case Pawn => {
-            val moveForwardBy = position.^_ // if (colour.equals(White)) position.^_ else position.v_
-            Set(moveForwardBy(1), moveForwardBy(2)).filter(optP => optP.isDefined).map(_.get)
+          role match {
+            case Pawn => {
+                val moveForwardBy: (Int) => Option[Position] =
+                  if (colour.equals(White)) position.^ else position.v
+                Set(moveForwardBy(1), moveForwardBy(2)).filter(optP => optP.isDefined).map(_.get)
+              }
+            case _ => Set()
           }
-          case _ => Set()
         }
-      }
     }
   }
 
@@ -54,15 +52,15 @@ class Game {
   def pieceAt(rank: Int, file: Int): Option[Piece] = pieceAt(Position(rank, file))
 
   def reset = {
-    for (file <- 'a' to 'h';
-         rank <- 1 to 8) {
+    for (file <- 'a' to 'h'; rank <- 1 to 8) {
       val coord = position(Symbol(file.toString + rank))
+      pieces(coord) = None
       rank match {
-        case 1 => pieces(coord) = Some(Piece(White, LineUp(file - 'a')))
-        case 2 => pieces(coord) = Some(Piece(White, Pawn))
-        case 7 => pieces(coord) = Some(Piece(Black, Pawn))
-        case 8 => pieces(coord) = Some(Piece(Black, LineUp(file - 'a')))
-        case _ => pieces(coord) = None
+        case 1 => place(Piece(White, LineUp(file - 'a'))) at coord
+        case 2 => place(Piece(White, Pawn)) at coord
+        case 7 => place(Piece(Black, Pawn)) at coord
+        case 8 => place(Piece(Black, LineUp(file - 'a'))) at coord
+        case _ =>
       }
     }
   }

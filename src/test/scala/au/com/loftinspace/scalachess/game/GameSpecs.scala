@@ -40,14 +40,15 @@ object GameSpec extends Specification with SystemContexts {
     */
 
     "provide the taken piece, if any, when a move is made".withA(game) { game =>
-      val queen = Piece(Black, Queen)
-      val rook = Piece(White, Rook)
-      game place queen at 'e8 must beNone
-      game place rook at 'e8 must beSome[Piece].which(_.equals(queen))
+      val queen = (game pieceAt 'd1).get
+      val rook = (game pieceAt 'a8).get
+      game place queen at 'f4 must beNone
+      game place rook at 'f4 must beSome[Piece].which(_.equals(queen))
     }
 
     "reject any attempt to check a piece at a non-coordinate".withA(game) { game =>
       game pieceAt 'a0 must throwAn[IllegalArgumentException]
+      game pieceAt 'z4 must throwAn[IllegalArgumentException]
       game pieceAt 'harvey must throwAn[IllegalArgumentException]
     }
 
@@ -55,29 +56,28 @@ object GameSpec extends Specification with SystemContexts {
       val king = Piece(Black, King)
       game place king at 'e0 must throwAn[IllegalArgumentException]
       game place king at 'fruit must throwAn[IllegalArgumentException]
-      game place king at null must throwAn[IllegalArgumentException]
     }
 
     "reset and replace the pieces on the board to the starting positions".withA(game) { game =>
       val pieces = Rook :: Bishop :: Knight :: Queen :: King :: Knight :: Bishop :: Rook :: Nil
       game.reset
-      for (i <- 1 to 8) {
-        game pieceAt Symbol("a"+i) must beSome[Piece].which(_ == Piece(White, pieces(i-1)))
-        game pieceAt Symbol("b"+i) must beSome[Piece].which(_ == Piece(White, Pawn))
-        game pieceAt Symbol("c"+i) must beNone
-        game pieceAt Symbol("d"+i) must beNone
-        game pieceAt Symbol("e"+i) must beNone
-        game pieceAt Symbol("f"+i) must beNone
-        game pieceAt Symbol("g"+i) must beSome[Piece].which(_ == Piece(Black, Pawn))
-        game pieceAt Symbol("h"+i) must beSome[Piece].which(_ == Piece(Black, pieces(i-1)))
+      for (file <- 'a' to 'h') {
+        game pieceAt Symbol(file.toString + 1) must beSome[Piece].which(_ == Piece(White, pieces(file-'a')))
+        game pieceAt Symbol(file.toString + 2) must beSome[Piece].which(_ == Piece(White, Pawn))
+        game pieceAt Symbol(file.toString + 3) must beNone
+        game pieceAt Symbol(file.toString + 4) must beNone
+        game pieceAt Symbol(file.toString + 5) must beNone
+        game pieceAt Symbol(file.toString + 6) must beNone
+        game pieceAt Symbol(file.toString + 7) must beSome[Piece].which(_ == Piece(Black, Pawn))
+        game pieceAt Symbol(file.toString + 8) must beSome[Piece].which(_ == Piece(Black, pieces(file-'a')))
       }
     }
 
     "keep a record of the taken pieces".withA(game) { game =>
-      val rook = Piece(Black, King)
-      val bishop = Piece(White, Bishop)
-      game place rook at 'f8
-      game place bishop at 'f8
+      val rook = (game pieceAt 'a1).get
+      val bishop = (game pieceAt 'c8).get
+      game place rook at 'e4
+      game place bishop at 'e4
       game.capturedPieces must contain(rook)
       game.capturedPieces must notContain(bishop)
       game.capturedPieces must haveSize(1)
