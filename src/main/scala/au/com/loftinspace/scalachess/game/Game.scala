@@ -34,14 +34,18 @@ class Game {
     println("working on ... " + p)
     if (!p.isInPlay) return Set()
     println("is in play")
-    val pos = p.position.get
+    val position = p.position.get
+    println("It's a " + p)
     p match {
       case Piece(colour, role) => {
-          role match {
-            case Pawn => Set(pos ^ 1, pos ^ 2).filter(_.isDefined).map(_.get)
-            case _ => Set()
+        role match {
+          case Pawn => {
+            val moveForwardBy = position.^_ // if (colour.equals(White)) position.^_ else position.v_
+            Set(moveForwardBy(1), moveForwardBy(2)).filter(optP => optP.isDefined).map(_.get)
           }
+          case _ => Set()
         }
+      }
     }
   }
 
