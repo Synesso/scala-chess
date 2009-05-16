@@ -1,6 +1,6 @@
 package au.com.loftinspace.scalachess.game
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable._
 import scala.util.matching.Regex
 import Positioning._
 
@@ -19,6 +19,7 @@ class Game {
     val piece = p.getOrElse(throw new IllegalMoveException("Cannot move a piece from an empty position"))
     def to(s: Symbol): Option[Piece] = {
       Game.this check piece canMoveTo s
+      piece.hasMoved = true
       Game.this place piece at s
     }
   }
@@ -50,20 +51,25 @@ class Game {
   }
 
   def findMovesFor(p: Piece): Set[Position] = {
-    if (!p.isInPlay) return Set()
+    val moves: Set[Position] = HashSet()
+    if (!p.isInPlay) return moves
     val position = p.position.get
     p match {
       case Piece(colour, role) => {
           role match {
             case Pawn => {
-                val moveForwardBy: (Int) => Option[Position] =
-                  if (colour.equals(White)) position.^ else position.v
-                Set(moveForwardBy(1), moveForwardBy(2)).filter(optP => optP.isDefined).map(_.get)
+                val maxSteps = if (p.hasMoved) 1 else 2
+                val moveForwardBy: (Int) => Option[Position] = if (colour.equals(White)) position.^ else position.v
+                for (step <- 1 to maxSteps; if (moveForwardBy(step)).isDefined; target = moveForwardBy(step).get) {
+                  if (pieceAt(target).isDefined) return moves;
+                  moves += target
+                }
               }
-            case _ => Set()
+            case _ =>
           }
         }
     }
+    moves
   }
 
   def pieceAt(p: Position) = pieces(p)

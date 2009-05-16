@@ -35,13 +35,43 @@ object PieceSpec extends Specification with SystemContexts {
     }
   }
 
-  "a pawn that is blocked" should {
+  "a pawn that has moved and is blocked" should {
     val blockedPawnGame = systemContext {
       val game = new Game
-//      game move 'e2 to 'e4
-//      game move 'e7 to 'e5
+      game move 'e2 to 'e4
+      game move 'e7 to 'e5
       game
     }
-    "no-op" in {}
+
+    "not be able to move anywhere".withA(blockedPawnGame) { game =>
+      val pawn = (game pieceAt 'e5).get
+      game findMovesFor pawn must beEmpty
+    }
+  }
+
+  "a pawn that has not yet moved and is blocked" should {
+    val blockedPawnGame = systemContext {
+      val game = new Game
+      game place(game pieceAt 'e2 get) at 'e6
+      game
+    }
+
+    "not be able to move anywhere".withA(blockedPawnGame) { game =>
+      val pawn = (game pieceAt 'e7).get
+      game findMovesFor pawn must beEmpty
+    }
+  }
+
+  "a pawn that has not yet moved and is blocked from moving 2 squares" should {
+    val blockedPawnGame = systemContext {
+      val game = new Game
+      game place(game pieceAt 'e2 get) at 'e5
+      game
+    }
+
+    "be able to move one square only".withA(blockedPawnGame) { game =>
+      val pawn = (game pieceAt 'e7).get
+      game findMovesFor pawn must containAll(Set(position('e6)))
+    }
   }
 }
