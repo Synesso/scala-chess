@@ -30,7 +30,7 @@ class Game {
       val target = position(s)
       val validMoves = Game.this findMovesFor p
       if (!validMoves.contains(target))
-        throw new IllegalMoveException(p + " cannot move from " + p.position + " to " + target)
+      throw new IllegalMoveException(p + " cannot move from " + p.position + " to " + target)
     }
   }
 
@@ -63,6 +63,13 @@ class Game {
                 for (step <- 1 to maxSteps; if (moveForwardBy(step)).isDefined; target = moveForwardBy(step).get) {
                   if (pieceAt(target).isDefined) return moves;
                   moves += target
+                }
+                val diagonals = List(moveForwardBy(1).get < 1, moveForwardBy(1).get > 1)
+                for (diagonal <- diagonals;
+                     if (diagonal.isDefined);
+                     if (pieceAt(diagonal.get).isDefined);
+                     if ((pieceAt(diagonal.get).get).colour.equals(p.opposingColour))) {
+                  moves += diagonal.get
                 }
               }
             case _ =>

@@ -21,9 +21,8 @@ object PieceSpec extends Specification with SystemContexts {
     }
   }
 
-  "a pawn at the start of a game" should {
+  "a pawn that has not yet moved" should {
     val newGame = systemContext {new Game}
-
     "be able to move either one or two spaces towards opposite colour".withA(newGame) { game =>
       val pawnsLocs = for (file <- 'a' to 'h'; rank <- List('2', '7')) yield position(Symbol(file.toString + rank))
       pawnsLocs.foreach { loc =>
@@ -32,20 +31,6 @@ object PieceSpec extends Specification with SystemContexts {
         val expected = Set(loc ^ direction, loc ^ direction*2).map(_.get)
         game findMovesFor pawn must containAll(expected)
       }
-    }
-  }
-
-  "a pawn that has moved and is blocked" should {
-    val blockedPawnGame = systemContext {
-      val game = new Game
-      game move 'e2 to 'e4
-      game move 'e7 to 'e5
-      game
-    }
-
-    "not be able to move anywhere".withA(blockedPawnGame) { game =>
-      val pawn = (game pieceAt 'e5).get
-      game findMovesFor pawn must beEmpty
     }
   }
 
@@ -71,7 +56,68 @@ object PieceSpec extends Specification with SystemContexts {
 
     "be able to move one square only".withA(blockedPawnGame) { game =>
       val pawn = (game pieceAt 'e7).get
-      game findMovesFor pawn must containAll(Set(position('e6)))
+      game findMovesFor pawn must containPositions('e6)
     }
+  }
+
+  "a pawn that has moved and is not blocked" should {
+    val blockedPawnGame = systemContext {
+      val game = new Game
+      game move 'e2 to 'e4
+      game
+    }
+
+    "be able to move 1 square forward".withA(blockedPawnGame) { game =>
+      val pawn = (game pieceAt 'e4).get
+      game findMovesFor pawn must containPositions('e5)
+    }
+  }
+
+  "a pawn that has opposing pieces on the forward diagonals" should {
+    val pawnCanTakeGame = systemContext {
+      val game = new Game
+      game move 'e2 to 'e4
+      game place (Piece(Black, Rook)) at 'd5
+      game place (Piece(Black, Pawn)) at 'f5
+      game
+    }
+
+    "be able to move 1 square forward or take to either diagonal".withA(pawnCanTakeGame) { game =>
+      val pawn = (game pieceAt 'e4).get
+      game findMovesFor pawn must containPositions('e5, 'd5, 'f5)
+    }
+  }
+
+  "a pawn at the edge of the board that has an opposing piece on a forward diagonal" should {
+    val pawnCanTakeGame = systemContext {
+      val game = new Game
+      game move 'a2 to 'a4
+      game place (Piece(Black, Rook)) at 'b5
+      game
+    }
+
+    "be able to move 1 square forward or take the diagonal".withA(pawnCanTakeGame) { game =>
+      val pawn = (game pieceAt 'a4).get
+      game findMovesFor pawn must containPositions('a5, 'b5)
+    }
+  }
+
+  "a pawn that has same side pieces on the forward diagonals" should {
+    val pawnCanTakeGame = systemContext {
+      val game = new Game
+      game move 'e2 to 'e4
+      game place (Piece(White, Rook)) at 'd5
+      game place (Piece(White, Pawn)) at 'f5
+      game
+    }
+
+    "be able to move 1 square forward only".withA(pawnCanTakeGame) { game =>
+      val pawn = (game pieceAt 'e4).get
+      game findMovesFor pawn must containPositions('e5)
+    }
+  }
+
+  private def containPositions(s: Symbol*) = {
+    containAll(s.map(position(_)))
   }
 }
