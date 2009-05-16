@@ -14,6 +14,25 @@ class Game {
   
   def capturedPieces = piecesCaptured
 
+  def move(s: Symbol) = new Movement(pieceAt(s))
+  case class Movement(p: Option[Piece]) {
+    val piece = p.getOrElse(throw new IllegalMoveException("Cannot move a piece from an empty position"))
+    def to(s: Symbol): Option[Piece] = {
+      Game.this check piece canMoveTo s
+      Game.this place piece at s
+    }
+  }
+
+  def check(p: Piece) = new PieceAssertion(p)
+  case class PieceAssertion(p: Piece) {
+    def canMoveTo(s: Symbol) = {
+      val target = position(s)
+      val validMoves = Game.this findMovesFor p
+      if (!validMoves.contains(target))
+        throw new IllegalMoveException(p + " cannot move from " + p.position + " to " + target)
+    }
+  }
+
   def place(p: Piece) = new Placement(p)
   case class Placement(p: Piece) {
     def at(s: Symbol): Option[Piece] = at(position(s))

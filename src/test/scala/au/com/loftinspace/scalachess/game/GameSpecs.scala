@@ -8,36 +8,12 @@ object GameSpec extends Specification with SystemContexts {
   "a game" should {
     val game = systemContext{ new Game }
 
-    /*
-    "allow a piece to be placed anywhere on the board".withA(game) { game =>
-      val pawn = Piece(White, Pawn)
-      val allCoordinates = for {
-        file <- 'a' to 'h'
-        row <- 1 to 8
-      } yield Symbol(file.toString + row)
-      allCoordinates.foreach { coord =>
-        game place pawn at coord must beNone
-        pawn.position must_== Some(position(coord))
-      }
-    }
-    */
-
     "report what piece is at any coordinate".withA(game) { game =>
       val pawn = Piece(Black, Pawn)
       game place pawn at 'e6
       game pieceAt 'e6 must beSome[Piece].which(_.equals(pawn))
       game pieceAt 'f6 must beNone
     }
-
-    /*
-    "have no more than one reference to the same piece".withA(game) { game =>
-      val pawn = Piece(Black, Pawn)
-      game place pawn at 'd7
-      game place pawn at 'd6
-      game pieceAt 'd7 must beNone
-      game pieceAt 'd6 must beSome[Piece].which(_.equals(pawn))
-    }
-    */
 
     "provide the taken piece, if any, when a move is made".withA(game) { game =>
       val queen = (game pieceAt 'd1).get
@@ -81,6 +57,27 @@ object GameSpec extends Specification with SystemContexts {
       game.capturedPieces must contain(rook)
       game.capturedPieces must notContain(bishop)
       game.capturedPieces must haveSize(1)
+    }
+
+    "permit a valid move".withA(game) { game =>
+      val captured = game move 'e2 to 'e4
+      captured must beNone
+    }
+
+    "disallow any move from a non-location".withA(game) { game =>
+      game move 'z2 to 'e4 must throwAn[IllegalArgumentException]
+    }
+
+    "disallow any move to a non-location".withA(game) { game =>
+      game move 'e2 to 'z4 must throwAn[IllegalArgumentException]
+    }
+
+    "disallow any move from an unoccupied position".withA(game) { game =>
+      game move 'e3 to 'e4 must throwAn[IllegalMoveException]
+    }
+
+    "disallow moves not permitted by the piece being moved".withA(game) { game =>
+      game move 'e2 to 'f3 must throwAn[IllegalMoveException]
     }
   }
 }
