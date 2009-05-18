@@ -71,6 +71,13 @@ class Game {
                      if ((pieceAt(diagonal.get).get).colour.equals(p.opposingColour))) {
                   moves += diagonal.get
                 }
+                val sides = List((position < 1, moveForwardBy(1).get < 1), (position > 1, moveForwardBy(1).get > 1))
+                for (side <- sides;
+                     if (side._1.isDefined);
+                     if (pieceAt(side._1.get).isDefined);
+                     if (pieceAt(side._1.get).get.lastMoveWasPawnLaunch)) {
+                  moves += side._2.get
+                }
               }
             case _ =>
           }

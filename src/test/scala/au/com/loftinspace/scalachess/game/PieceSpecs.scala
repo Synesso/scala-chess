@@ -117,6 +117,20 @@ object PieceSpec extends Specification with SystemContexts {
     }
   }
 
+  "a pawn that is adjacent to an apposing pawn that has just moved 2 places" should {
+    val pawnEnPassantGame = systemContext {
+      val game = new Game
+      game move 'e2 to 'e4
+      game place (Piece(Black, Pawn)) at 'f4
+      game
+    }
+
+    "be able to perform en passant".withA(pawnEnPassantGame) { game =>
+      val pawn = (game pieceAt 'f4).get
+      game findMovesFor pawn must containPositions('e3, 'f3)
+    }
+  }
+
   private def containPositions(s: Symbol*) = {
     containAll(s.map(position(_)))
   }
