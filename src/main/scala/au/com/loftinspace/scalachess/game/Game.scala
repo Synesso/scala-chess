@@ -104,6 +104,8 @@ class Game {
     }
   }
 
+  def moves = Nil
+
   def printout = {
     for (rank <- 8 to 1 by -1) {
       for (file <- 'a' to 'h') {
