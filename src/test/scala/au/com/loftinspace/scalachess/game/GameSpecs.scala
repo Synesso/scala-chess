@@ -79,5 +79,17 @@ object GameSpec extends Specification with SystemContexts {
     "disallow moves not permitted by the piece being moved".withA(game) { game =>
       game move 'e2 to 'f3 must throwAn[IllegalMoveException]
     }
+
+    "report zero moves made when new".withA(game) { game =>
+      game.moves must beEmpty
+    }
+
+/*
+    "report the moves made when in progress".withA(game) { game =>
+      game move 'e2 to 'e4
+      game move 'a7 to 'a6
+      game.moves must 
+    }
+*/
   }
 }
