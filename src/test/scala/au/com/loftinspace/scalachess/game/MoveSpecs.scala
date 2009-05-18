@@ -8,43 +8,58 @@ object MoveSpec extends Specification with SystemContexts {
   "a move" should {
     "describe the piece being moved" in {
       val piece = Piece(White, Bishop)
-      val move = new Move(piece, null, null, null)
+      val move = Move(piece, null, null, None)
       move.piece must_== piece
     }
 
     "describe the position moved from" in {
       val position = Position(4, 7)
-      val move = new Move(null, position, null, null)
+      val move = Move(null, position, null, None)
       move.from must_== position
     }
 
     "describe the position moved to" in {
       val position = Position(3, 1)
-      val move = new Move(null, null, position, null)
+      val move = Move(null, null, position, None)
       move.to must_== position
     }
 
     "describe the piece taken, if any" in {
       val piece = Piece(Black, Pawn)
-      val move = new Move(null, null, null, piece)
-      move.taking must_== piece
+      val move = Move(null, null, null, Some(piece))
+      move.taking must beSome[Piece].which(_.equals(piece))
     }
   }
 
-  // TODO - actually, en passant is the reply. This doesn't have a name. Call it pawn-launch?
-  "a pawn move two spaces forward from its starting position" should {
-    "be described as en passant" in {
-      val move = new Move(Piece(White, Pawn), Position(2, 1), Position(4, 1), null)
-      move.isEnPassant must beTrue
+  "a white pawn move two spaces forward from its starting position" should {
+    "be described as pawnlaunch" in {
+      val move = Move(Piece(White, Pawn), position('d2), position('d4), None)
+      move.isPawnLaunch must beTrue
     }
   }
 
-  // TODO -- check for every pawn
+  "a black pawn move two spaces forward from its starting position" should {
+    "be described as pawnlaunch" in {
+      val move = Move(Piece(Black, Pawn), position('h7), position('h5), None)
+      move.isPawnLaunch must beTrue
+    }
+  }
+
   "a pawn move other than two spaces forward from its starting position" should {
-    "not be described as en passant" in {
-      val move = new Move(Piece(White, Pawn), Position(2, 1), Position(3, 1), null)
-      move.isEnPassant must beFalse
+    "not be described as pawnlaunch" in {
+      Move(Piece(White, Pawn), position('a2), position('a3), None).isPawnLaunch must beFalse
     }
   }
 
+  "a non-pawn move" should {
+    "not be described as pawn launch" in {
+      Move(Piece(White, Bishop), position('a2), position('a4), None).isPawnLaunch must beFalse
+    }
+  }
+  
+  "a pawn capturing move" should {
+    "not be described as pawn launch" in {
+      Move(Piece(Black, Pawn), position('a2), position('b3), None).isPawnLaunch must beFalse
+    }
+  }
 }

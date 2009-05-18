@@ -84,12 +84,16 @@ object GameSpec extends Specification with SystemContexts {
       game.moves must beEmpty
     }
 
-/*
     "report the moves made when in progress".withA(game) { game =>
+      val whitePawn = (game pieceAt 'e2).get
+      val blackPawn = (game pieceAt 'd7).get
       game move 'e2 to 'e4
-      game move 'a7 to 'a6
-      game.moves must 
+      game move 'd7 to 'd5
+      game move 'e4 to 'd5
+      game.moves must containInOrder(List(
+        Move(whitePawn, position('e2), position('e4), None),
+        Move(blackPawn, position('d7), position('d5), None),
+        Move(whitePawn, position('e4), position('d5), Some(blackPawn))))
     }
-*/
   }
 }

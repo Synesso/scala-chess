@@ -10,6 +10,8 @@ class Game {
 
   private val pieces = new HashMap[Position, Option[Piece]]
   private var piecesCaptured: List[Piece] = Nil
+  private var movesMade: List[Move] = Nil
+
   reset
   
   def capturedPieces = piecesCaptured
@@ -19,8 +21,11 @@ class Game {
     val piece = p.getOrElse(throw new IllegalMoveException("Cannot move a piece from an empty position"))
     def to(s: Symbol): Option[Piece] = {
       Game.this check piece canMoveTo s
+      val from = piece.position.get
       piece.hasMoved = true
-      Game.this place piece at s
+      val taken = Game.this place piece at s
+      movesMade = movesMade ::: List(Move(piece, from, position(s), taken))
+      taken
     }
   }
 
@@ -104,7 +109,7 @@ class Game {
     }
   }
 
-  def moves = Nil
+  def moves = movesMade
 
   def printout = {
     for (rank <- 8 to 1 by -1) {
