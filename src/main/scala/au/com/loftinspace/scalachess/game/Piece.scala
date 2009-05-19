@@ -20,6 +20,8 @@ object opposite {
 }
 
 case class Piece(colour: Colour, role: Role) {
+  import scala.collection.immutable.HashSet
+
   var captured = false
   var hasMoved = false
   var lastMoveWasPawnLaunch = false;
@@ -27,6 +29,8 @@ case class Piece(colour: Colour, role: Role) {
 
   def opposingColour = opposite of colour
   def isInPlay = position.isDefined && !captured
+
+  def movesWithinContext(pieces: Map[Position, Option[Piece]], lastMove: Option[Move]): Set[Position] = HashSet()
 
   override def toString = colour + " " + role
 }

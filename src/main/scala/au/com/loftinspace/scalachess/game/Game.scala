@@ -56,6 +56,8 @@ class Game {
   }
 
   def findMovesFor(p: Piece): Set[Position] = {
+    p.movesWithinContext(pieces, if (moves.size == 0) None else Some(moves.last))
+/*
     var moves: Set[Position] = HashSet()
     if (!p.isInPlay) return moves
     val position = p.position.get
@@ -89,6 +91,7 @@ class Game {
         }
     }
     moves
+*/
   }
 
   def pieceAt(p: Position) = pieces(p)
