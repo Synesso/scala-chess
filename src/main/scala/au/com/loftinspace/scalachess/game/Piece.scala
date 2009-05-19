@@ -1,20 +1,19 @@
 package au.com.loftinspace.scalachess.game
 
 trait Role
-trait Orientation
-case object King extends Role with Orientation
-case object Queen extends Role with Orientation
+case object King extends Role
+case object Queen extends Role
 case object Rook extends Role
 case object Bishop extends Role
 case object Knight extends Role
 case object Pawn extends Role
 
 trait Colour
-case object White extends Colour with Orientation
-case object Black extends Colour with Orientation
+case object White extends Colour
+case object Black extends Colour
 
 object opposite {
-  def of(r: Role with Orientation) = r match {
+  def of(r: Role) = r match {
     case King => Queen
     case Queen => King
   }
