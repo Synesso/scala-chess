@@ -13,10 +13,6 @@ case object White extends Colour
 case object Black extends Colour
 
 object opposite {
-  def of(r: Role) = r match {
-    case King => Queen
-    case Queen => King
-  }
   def of (c: Colour) = c match {
     case Black => White
     case White => Black
