@@ -1,6 +1,6 @@
 package au.com.loftinspace.scalachess.game
 
-import scala.collection.mutable._
+import scala.collection.immutable._
 import scala.util.matching.Regex
 import Positioning._
 
@@ -8,7 +8,7 @@ class Game {
   private val CoordinatePattern = new Regex("^[a-h][1-8]$")
   private val LineUp = Rook :: Bishop :: Knight :: Queen :: King :: Knight :: Bishop :: Rook :: Nil
 
-  private val pieces = new HashMap[Position, Option[Piece]]
+  private var pieces: Map[Position, Option[Piece]] = new HashMap[Position, Option[Piece]]
   private var piecesCaptured: List[Piece] = Nil
   private var movesMade: List[Move] = Nil
 
@@ -48,15 +48,15 @@ class Game {
         cap.captured = true
         piecesCaptured = cap :: piecesCaptured
       }
-      p.position.foreach{(origin: Position) => pieces(origin) = None}
+      p.position.foreach{(origin: Position) => pieces = pieces.update(origin, None)}
       p.position = Some(destination)
-      pieces(destination) = Some(p)
+      pieces = pieces.update(destination, Some(p))
       captured
     }
   }
 
   def findMovesFor(p: Piece): Set[Position] = {
-    val moves: Set[Position] = HashSet()
+    var moves: Set[Position] = HashSet()
     if (!p.isInPlay) return moves
     val position = p.position.get
     p match {
@@ -98,7 +98,7 @@ class Game {
   def reset = {
     for (file <- 'a' to 'h'; rank <- 1 to 8) {
       val coord = position(Symbol(file.toString + rank))
-      pieces(coord) = None
+      pieces = pieces.update(coord, None)
       rank match {
         case 1 => place(Piece(White, LineUp(file - 'a'))) at coord
         case 2 => place(Piece(White, Pawn)) at coord
