@@ -30,7 +30,37 @@ case class Piece(colour: Colour, role: Role) {
   def opposingColour = opposite of colour
   def isInPlay = position.isDefined && !captured
 
-  def movesWithinContext(pieces: Map[Position, Option[Piece]], lastMove: Option[Move]): Set[Position] = HashSet()
+  def movesWithinContext(pieces: Map[Position, Option[Piece]], lastMove: Option[Move]): Set[Position] = {
+    var result: Set[Position] = HashSet()
+    if (isInPlay) {
+      role match {
+        case Pawn => {
+          val maxSteps = if (hasMoved) 1 else 2
+          val moveForwardBy: (Int) => Option[Position] = if (colour.equals(White)) position.get.^ else position.get.v
+          var clearPath = true
+          for (step <- 1 to maxSteps; if (moveForwardBy(step)).isDefined; if (clearPath); target = moveForwardBy(step).get) {
+            clearPath = !pieces(target).isDefined
+            if (clearPath) { result += target }
+          }
+          val diagonals = List(moveForwardBy(1).get < 1, moveForwardBy(1).get > 1)
+          for (diagonal <- diagonals;
+               if (diagonal.isDefined);
+               if (pieces(diagonal.get).isDefined);
+               if ((pieces(diagonal.get).get).colour.equals(opposingColour))) {
+            result += diagonal.get
+          }
+          val sides = List((position.get < 1, moveForwardBy(1).get < 1), (position.get > 1, moveForwardBy(1).get > 1))
+          for (side <- sides;
+               if (side._1.isDefined);
+               if (pieces(side._1.get).isDefined);
+               if (pieces(side._1.get).get.lastMoveWasPawnLaunch)) {
+            result += side._2.get
+          }
+        }
+      }
+    }
+    result
+  }
 
   override def toString = colour + " " + role
 }

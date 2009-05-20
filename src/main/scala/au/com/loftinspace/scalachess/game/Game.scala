@@ -57,41 +57,6 @@ class Game {
 
   def findMovesFor(p: Piece): Set[Position] = {
     p.movesWithinContext(pieces, if (moves.size == 0) None else Some(moves.last))
-/*
-    var moves: Set[Position] = HashSet()
-    if (!p.isInPlay) return moves
-    val position = p.position.get
-    p match {
-      case Piece(colour, role) => {
-          role match {
-            case Pawn => {
-                val maxSteps = if (p.hasMoved) 1 else 2
-                val moveForwardBy: (Int) => Option[Position] = if (colour.equals(White)) position.^ else position.v
-                for (step <- 1 to maxSteps; if (moveForwardBy(step)).isDefined; target = moveForwardBy(step).get) {
-                  if (pieceAt(target).isDefined) return moves;
-                  moves += target
-                }
-                val diagonals = List(moveForwardBy(1).get < 1, moveForwardBy(1).get > 1)
-                for (diagonal <- diagonals;
-                     if (diagonal.isDefined);
-                     if (pieceAt(diagonal.get).isDefined);
-                     if ((pieceAt(diagonal.get).get).colour.equals(p.opposingColour))) {
-                  moves += diagonal.get
-                }
-                val sides = List((position < 1, moveForwardBy(1).get < 1), (position > 1, moveForwardBy(1).get > 1))
-                for (side <- sides;
-                     if (side._1.isDefined);
-                     if (pieceAt(side._1.get).isDefined);
-                     if (pieceAt(side._1.get).get.lastMoveWasPawnLaunch)) {
-                  moves += side._2.get
-                }
-              }
-            case _ =>
-          }
-        }
-    }
-    moves
-*/
   }
 
   def pieceAt(p: Position) = pieces(p)
