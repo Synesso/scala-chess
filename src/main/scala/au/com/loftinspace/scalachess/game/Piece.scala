@@ -49,12 +49,11 @@ case class Piece(colour: Colour, role: Role) {
                if ((pieces(diagonal.get).get).colour.equals(opposingColour))) {
             result += diagonal.get
           }
-          val sides = List((position.get < 1, moveForwardBy(1).get < 1), (position.get > 1, moveForwardBy(1).get > 1))
-          for (side <- sides;
-               if (side._1.isDefined);
-               if (pieces(side._1.get).isDefined);
-               if (pieces(side._1.get).get.lastMoveWasPawnLaunch)) {
-            result += side._2.get
+          val sides = List(position.get < 1, position.get > 1)
+          if (lastMove.isDefined && lastMove.get.isPawnLaunch && sides.contains(Some(lastMove.get.to))) {
+            val from = lastMove.get.from
+            val to = lastMove.get.to
+            result += Position((from.rank + to.rank) / 2, from.file)
           }
         }
       }
