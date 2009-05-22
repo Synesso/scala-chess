@@ -3,6 +3,7 @@ package au.com.loftinspace.scalachess.game
 import org.specs._
 import org.scalacheck.Prop._
 import Positioning._
+import PositionAssertions._
 
 object PieceSpec extends Specification with SystemContexts {
 
@@ -101,6 +102,21 @@ object PieceSpec extends Specification with SystemContexts {
       game findMovesFor pawn must containPositions('a5, 'b5)
     }
   }
+ 
+  "a pawn that is blocked from going forward but has an opposing piece on the diagonal" should {
+    val blockedPawnCanTakeGame = systemContext {
+      val game = new Game
+      game move 'f7 to 'f5
+      game place (Piece(Black, Pawn)) at 'f4
+      game place (Piece(White, Queen)) at 'e4
+      game
+    }
+
+    "be able to take on the diagonal only".withA(blockedPawnCanTakeGame) { game =>
+      val pawn = (game pieceAt 'f5).get
+      game findMovesFor pawn must containPositions('e4)
+    }
+  }
 
   "a pawn that has same side pieces on the forward diagonals" should {
     val pawnCanTakeGame = systemContext {
@@ -129,9 +145,5 @@ object PieceSpec extends Specification with SystemContexts {
       val pawn = (game pieceAt 'f4).get
       game findMovesFor pawn must containPositions('e3, 'f3)
     }
-  }
-
-  private def containPositions(s: Symbol*) = {
-    containAll(s.map(position(_)))
   }
 }

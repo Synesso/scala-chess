@@ -22,6 +22,13 @@ object GameSpec extends Specification with SystemContexts {
       game place rook at 'f4 must beSome[Piece].which(_.equals(queen))
     }
 
+    "provide the taken piece when en passant is made".withA(game) { game =>
+      game place Piece(White, Pawn) at 'g4
+      game move 'g4 to 'g5
+      game move 'f7 to 'f5
+      game move 'g5 to 'f6 must beSome[Piece].which(_ == Piece(Black, Pawn))
+    }
+
     "reject any attempt to check a piece at a non-coordinate".withA(game) { game =>
       game pieceAt 'a0 must throwAn[IllegalArgumentException]
       game pieceAt 'z4 must throwAn[IllegalArgumentException]

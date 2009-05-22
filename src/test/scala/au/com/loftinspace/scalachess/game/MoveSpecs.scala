@@ -29,6 +29,11 @@ object MoveSpec extends Specification with SystemContexts {
       val move = Move(null, null, null, Some(piece))
       move.taking must beSome[Piece].which(_.equals(piece))
     }
+
+    "know about the positions travelled throughi, along a file" in {
+      val move = Move(null, position('a3), position('a7), None)
+      move.traversing must containAll('a4, 'a5, 'a6)
+    }
   }
 
   "a white pawn move two spaces forward from its starting position" should {
