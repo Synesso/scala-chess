@@ -4,7 +4,6 @@ import org.specs._
 import Positioning._
 
 object GameSpec extends Specification with SystemContexts {
-
   "a game" should {
     val game = systemContext{ new Game }
 

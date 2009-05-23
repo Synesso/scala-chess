@@ -4,7 +4,6 @@ import org.specs._
 import Positioning._
 
 object MoveSpec extends Specification with SystemContexts {
-
   "a move" should {
     "describe the piece being moved" in {
       val piece = Piece(White, Bishop)
@@ -30,9 +29,38 @@ object MoveSpec extends Specification with SystemContexts {
       move.taking must beSome[Piece].which(_.equals(piece))
     }
 
-    "know about the positions travelled throughi, along a file" in {
+    "know about the positions travelled through, along a file" in {
       val move = Move(null, position('a3), position('a7), None)
-      move.traversing must containAll('a4, 'a5, 'a6)
+      move.traversing must containPositions('a4, 'a5, 'a6)
+    }
+
+    "know about the positions travelled through, along a rank" in {
+      val move = Move(null, position('d3), position('a3), None)
+      move.traversing must containPositions('b3, 'c3)
+en    }
+
+    "know about the positions travelled through, diagonally" in {
+      val move = Move(null, position('f7), position('b3), None)
+      move.traversing must containPositions('c4, 'd5, 'e6)
+    }
+
+    "know about the positions travelled through, in a knight move (i.e. none)" in {
+      val move = Move(null, position('d8), position('c6), None)
+      move.traversing must beEmpty
+    }
+
+    "know about the positions travelled through, in a non move (unexpected)" in {
+      val move = Move(null, position('d8), position('d8), None)
+      move.traversing must beEmpty
+    }
+
+    "report whether it traversed through a specific position" in {
+      val move = Move(Piece(Black, Rook), position('d3), position('h3), None)
+      for (file <- 'a' to 'h'; rank <- 1 to 8) {
+        val position = Symbol(file.toString + rank)
+        val description = "query ... does " + move + " traverse " + position + "?"
+        move traversed position aka description must_== Set('e3, 'f3, 'g3).contains(position)
+      }
     }
   }
 
@@ -61,10 +89,12 @@ object MoveSpec extends Specification with SystemContexts {
       Move(Piece(White, Bishop), position('a2), position('a4), None).isPawnLaunch must beFalse
     }
   }
-  
+
   "a pawn capturing move" should {
     "not be described as pawn launch" in {
       Move(Piece(Black, Pawn), position('a2), position('b3), None).isPawnLaunch must beFalse
     }
   }
+
+  private def containPositions(s: Symbol*) = containAll(s.map(position(_)))
 }

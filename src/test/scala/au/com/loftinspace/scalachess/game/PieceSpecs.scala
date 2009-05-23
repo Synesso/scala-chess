@@ -3,10 +3,8 @@ package au.com.loftinspace.scalachess.game
 import org.specs._
 import org.scalacheck.Prop._
 import Positioning._
-import PositionAssertions._
 
 object PieceSpec extends Specification with SystemContexts {
-
   "a piece that is taken" should {
     val takenPiece = systemContext {
       val game = new Game
@@ -38,7 +36,7 @@ object PieceSpec extends Specification with SystemContexts {
   "a pawn that has not yet moved and is blocked" should {
     val blockedPawnGame = systemContext {
       val game = new Game
-      game place(game pieceAt 'e2 get) at 'e6
+      game place (game pieceAt 'e2 get) at 'e6
       game
     }
 
@@ -102,7 +100,7 @@ object PieceSpec extends Specification with SystemContexts {
       game findMovesFor pawn must containPositions('a5, 'b5)
     }
   }
- 
+
   "a pawn that is blocked from going forward but has an opposing piece on the diagonal" should {
     val blockedPawnCanTakeGame = systemContext {
       val game = new Game
@@ -146,4 +144,6 @@ object PieceSpec extends Specification with SystemContexts {
       game findMovesFor pawn must containPositions('e3, 'f3)
     }
   }
+
+  private def containPositions(s: Symbol*) = containAll(s.map(position(_)))
 }

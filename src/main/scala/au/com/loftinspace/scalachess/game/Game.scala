@@ -24,10 +24,9 @@ class Game {
       val from = piece.position.get
       piece.hasMoved = true
       var taken = Game.this place piece at s
-/*
-      if (taken.isEmpty && (movesMade.lastOption.map(_.isPawnLauch && _.travelledThrough(s))).getOrElse(false) {
+      if (taken.isEmpty && (movesMade.lastOption.map(move => move.isPawnLaunch && move.traversed(s))).getOrElse(false)) {
+        taken = Some(movesMade.last.piece)
       }
-*/
       movesMade = movesMade ::: List(Move(piece, from, position(s), taken))
       taken
     }
