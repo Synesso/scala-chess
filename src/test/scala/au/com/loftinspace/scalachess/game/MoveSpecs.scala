@@ -37,7 +37,7 @@ object MoveSpec extends Specification with SystemContexts {
     "know about the positions travelled through, along a rank" in {
       val move = Move(null, position('d3), position('a3), None)
       move.traversing must containPositions('b3, 'c3)
-en    }
+    }
 
     "know about the positions travelled through, diagonally" in {
       val move = Move(null, position('f7), position('b3), None)

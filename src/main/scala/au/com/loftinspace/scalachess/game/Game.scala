@@ -26,6 +26,8 @@ class Game {
       var taken = Game.this place piece at s
       if (taken.isEmpty && (movesMade.lastOption.map(move => move.isPawnLaunch && move.traversed(s))).getOrElse(false)) {
         taken = Some(movesMade.last.piece)
+        taken.get.captured = true
+        piecesCaptured = taken.get :: piecesCaptured
       }
       movesMade = movesMade ::: List(Move(piece, from, position(s), taken))
       taken

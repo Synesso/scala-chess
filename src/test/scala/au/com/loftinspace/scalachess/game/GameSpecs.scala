@@ -22,10 +22,13 @@ object GameSpec extends Specification with SystemContexts {
     }
 
     "provide the taken piece when en passant is made".withA(game) { game =>
+      val takenPawn = (game pieceAt 'f7).get
       game place Piece(White, Pawn) at 'g4
       game move 'g4 to 'g5
       game move 'f7 to 'f5
-      game move 'g5 to 'f6 must beSome[Piece].which(_ == Piece(Black, Pawn))
+      game move 'g5 to 'f6 must beSome[Piece].which(_ == takenPawn)
+      game.capturedPieces must containAll(Set(takenPawn))
+      takenPawn.captured must beTrue
     }
 
     "reject any attempt to check a piece at a non-coordinate".withA(game) { game =>
