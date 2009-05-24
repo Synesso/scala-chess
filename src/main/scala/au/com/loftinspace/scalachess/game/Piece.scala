@@ -61,6 +61,7 @@ case class Piece(colour: Colour, role: Role) {
     if (isInPlay) {
       role match {
         case Pawn => forward ++ diagonals ++ enpassant
+        case _ => Set()
       }
     } else Set()
   }

@@ -149,6 +149,14 @@ object PieceSpec extends Specification with SystemContexts {
       game place pawn at 'g4
       game findMovesFor pawn must containPositions('g3)
     }
+
+    "not be able to perform en passant if other moves have been made".withA(pawnEnPassantGame) { game =>
+      val pawn = Piece(Black, Pawn)
+      game move 'a7 to 'a6
+      game move 'a2 to 'a3
+      game place pawn at 'f4
+      game findMovesFor pawn must containPositions('f3)
+    }
   }
 
   private def containPositions(s: Symbol*) = containAll(s.map(position(_)))
