@@ -61,7 +61,7 @@ class Game {
   }
 
   def findMovesFor(p: Piece): Set[Position] = {
-    p.movesWithinContext(pieces, if (moves.size == 0) None else Some(moves.last))
+    p.movesWithinContext(pieces, moves.lastOption)
   }
 
   def pieceAt(p: Position) = pieces(p)

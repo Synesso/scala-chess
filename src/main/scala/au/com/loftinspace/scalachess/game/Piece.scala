@@ -31,34 +31,38 @@ case class Piece(colour: Colour, role: Role) {
   def isInPlay = position.isDefined && !captured
 
   def movesWithinContext(pieces: Map[Position, Option[Piece]], lastMove: Option[Move]): Set[Position] = {
-    var result: Set[Position] = HashSet()
+
+    val moveForwardBy: (Int) => Option[Position] = if (colour.equals(White)) position.get.^ else position.get.v
+
+    def forward = {
+      // todo - this is a pawn specific move - can be generic?
+      var result: Set[Position] = HashSet()
+      val maxSteps = if (hasMoved) 1 else 2
+      var clearPath = true
+      for (step <- 1 to maxSteps; if (moveForwardBy(step)).isDefined; if (clearPath); target = moveForwardBy(step).get) {
+        clearPath = !pieces(target).isDefined
+        if (clearPath) { result += target }
+      }
+      result
+    }
+
+    def diagonals: Set[Position] = {
+      // todo - this is a pawn specific move - can be generic?
+      val candidates = Set(moveForwardBy(1).get < 1, moveForwardBy(1).get > 1).filter(_.isDefined).map(_.get)
+      candidates.filter{candidate => pieces(candidate).map(_.colour.equals(opposingColour)).getOrElse(false)}
+    }
+
+    def enpassant = {
+      val sides = Set(position.get < 1, position.get > 1).filter(_.isDefined).map(_.get)
+      lastMove.filter(move => move.isPawnLaunch && sides.contains(move.to))
+              .map(move => Position((move.to.rank + move.from.rank) /2, move.to.file)).toList
+    }
+
     if (isInPlay) {
       role match {
-        case Pawn => {
-          val maxSteps = if (hasMoved) 1 else 2
-          val moveForwardBy: (Int) => Option[Position] = if (colour.equals(White)) position.get.^ else position.get.v
-          var clearPath = true
-          for (step <- 1 to maxSteps; if (moveForwardBy(step)).isDefined; if (clearPath); target = moveForwardBy(step).get) {
-            clearPath = !pieces(target).isDefined
-            if (clearPath) { result += target }
-          }
-          val diagonals = List(moveForwardBy(1).get < 1, moveForwardBy(1).get > 1)
-          for (diagonal <- diagonals;
-               if (diagonal.isDefined);
-               if (pieces(diagonal.get).isDefined);
-               if ((pieces(diagonal.get).get).colour.equals(opposingColour))) {
-            result += diagonal.get
-          }
-          val sides = List(position.get < 1, position.get > 1)
-          if (lastMove.isDefined && lastMove.get.isPawnLaunch && sides.contains(Some(lastMove.get.to))) {
-            val from = lastMove.get.from
-            val to = lastMove.get.to
-            result += Position((from.rank + to.rank) / 2, from.file)
-          }
-        }
+        case Pawn => forward ++ diagonals ++ enpassant
       }
-    }
-    result
+    } else Set()
   }
 
   override def toString = colour + " " + role

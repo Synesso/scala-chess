@@ -11,7 +11,7 @@ case class Move(val piece: Piece, val from: Position, val to: Position, val taki
     from.file.equals(to.file) && piece.role.equals(Pawn)
 
   def traversing: Set[Position] = {
-    if (from.equals(to)) return Set()
+    if (from equals to) return Set()
     var traversed: Set[Position] = Set()
     val minFile = min(from.file, to.file)
     val maxFile = max(from.file, to.file)
