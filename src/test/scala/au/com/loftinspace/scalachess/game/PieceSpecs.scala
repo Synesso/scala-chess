@@ -131,17 +131,23 @@ object PieceSpec extends Specification with SystemContexts {
     }
   }
 
-  "a pawn that is adjacent to an opposing pawn that has just moved 2 places" should {
+  "a pawn that is on the same rank as an opposing pawn that has just moved 2 places" should {
     val pawnEnPassantGame = systemContext {
       val game = new Game
       game move 'e2 to 'e4
-      game place (Piece(Black, Pawn)) at 'f4
       game
     }
 
-    "be able to perform en passant".withA(pawnEnPassantGame) { game =>
-      val pawn = (game pieceAt 'f4).get
+    "be able to perform en passant if adjacent".withA(pawnEnPassantGame) { game =>
+      val pawn = Piece(Black, Pawn)
+      game place pawn at 'f4
       game findMovesFor pawn must containPositions('e3, 'f3)
+    }
+
+    "not be able to perform en passant if not adjacent".withA(pawnEnPassantGame) { game =>
+      val pawn = Piece(Black, Pawn)
+      game place pawn at 'g4
+      game findMovesFor pawn must containPositions('g3)
     }
   }
 
