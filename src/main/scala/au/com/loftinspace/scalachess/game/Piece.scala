@@ -58,9 +58,27 @@ case class Piece(colour: Colour, role: Role) {
               .map(move => Position((move.to.rank + move.from.rank) /2, move.to.file)).toList
     }
 
+    def expand(direction: (Position=>Option[Position])*): Set[Position] = {
+      def next(p: Position, accumulator: Set[Position], direction: Array[(Position=>Option[Position])]): Set[Position] = {
+        val nextPositionOpt = direction.foldLeft(Some(p): Option[Position]){(currentPos, nextMove) => currentPos.flatMap(nextMove(_))}
+        val nextColourOpt = nextPositionOpt.flatMap(pieces(_)).map(piece => (piece.colour))
+        nextColourOpt.map(nextColour => return if (nextColour.equals(colour)) accumulator else accumulator + nextPositionOpt.get)
+        nextPositionOpt.map(nextPos => return next(nextPos, accumulator + nextPos, direction))
+        accumulator
+      }
+      next(position.get, Set(), direction.toArray)
+    }
+
+    def ^(p: Position) = p ^ 1
+    def >(p: Position) = p > 1
+    def v(p: Position) = p v 1
+    def <(p: Position) = p < 1
+
     if (isInPlay) {
       role match {
         case Pawn => forward ++ diagonals ++ enpassant
+        case Rook => expand(<) ++ expand(^) ++ expand(>) ++ expand(v)
+        case Bishop => expand(v,>) ++ expand(v,<) ++ expand(^,>) ++ expand(^,<)
         case _ => Set()
       }
     } else Set()

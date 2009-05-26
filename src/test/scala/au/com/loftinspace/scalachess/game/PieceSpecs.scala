@@ -159,5 +159,35 @@ object PieceSpec extends Specification with SystemContexts {
     }
   }
 
+  "a rook" should {
+    "not be able to move from starting position" in {
+      val game = new Game
+      val rook = (game pieceAt 'a1 get)
+      game findMovesFor rook must beEmpty
+    }
+
+    "be able to move along rank and file until blocked" in {
+      val game = new Game
+      val rook = Piece(Black, Rook)
+      game place rook at 'f3
+      game findMovesFor rook must containPositions('f2, 'f4, 'f5, 'f6, 'a3, 'b3, 'c3, 'd3, 'e3, 'g3, 'h3)
+    }
+  }
+
+  "a bishop" should {
+    "not be able to move from starting position" in {
+      val game = new Game
+      val bishop = (game pieceAt 'c1 get)
+      game findMovesFor bishop must beEmpty
+    }
+
+    "be able to move along diagonals until blocked" in {
+      val game = new Game
+      val bishop = Piece(White, Bishop)
+      game place bishop at 'f5
+      game findMovesFor bishop must containPositions('e4, 'd3, 'e6, 'd7, 'g4, 'h3, 'g6, 'h7)
+    }
+  }
+
   private def containPositions(s: Symbol*) = containAll(s.map(position(_)))
 }
