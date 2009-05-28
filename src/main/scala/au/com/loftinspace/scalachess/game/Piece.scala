@@ -21,6 +21,7 @@ object opposite {
 
 case class Piece(colour: Colour, role: Role) {
   import scala.collection.immutable.HashSet
+  import Math.abs
 
   var captured = false
   var hasMoved = false
@@ -35,19 +36,18 @@ case class Piece(colour: Colour, role: Role) {
     val moveForwardBy: (Int) => Option[Position] = if (colour.equals(White)) position.get.^ else position.get.v
 
     def forward = {
-      // todo - this is a pawn specific move - can be generic?
-      var result: Set[Position] = HashSet()
-      val maxSteps = if (hasMoved) 1 else 2
-      var clearPath = true
-      for (step <- 1 to maxSteps; if (moveForwardBy(step)).isDefined; if (clearPath); target = moveForwardBy(step).get) {
-        clearPath = !pieces(target).isDefined
-        if (clearPath) { result += target }
-      }
-      result
+      val potentials = if (hasMoved) Set(moveForwardBy(1)) else Set(moveForwardBy(1), moveForwardBy(2))
+      potentials.foldLeft((Set(): Set[Position], true)) { (result: (Set[Position], Boolean), pos: Option[Position]) =>
+        if (!result._2)
+          result
+        else if (pos.map(!pieces(_).isDefined).getOrElse(false))
+          (result._1 + pos.get, true)
+        else
+          (result._1, false)
+      }._1
     }
 
     def diagonals: Set[Position] = {
-      // todo - this is a pawn specific move - can be generic?
       val candidates = Set(moveForwardBy(1).get < 1, moveForwardBy(1).get > 1).filter(_.isDefined).map(_.get)
       candidates.filter{candidate => pieces(candidate).map(_.colour.equals(opposingColour)).getOrElse(false)}
     }
@@ -79,21 +79,25 @@ case class Piece(colour: Colour, role: Role) {
     def v(p: Position) = p v 1
     def <(p: Position) = p < 1
 
-    def knightRing: Set[Position] = {
-      import Math.abs
-      val offsets = Set(-2, -1, 1, 2)
-      val potentials = for (x <- offsets; y <- offsets; if(abs(x)!=abs(y))) yield position.get.^(x).flatMap(_.>(y))
+    def ring(offsets: Set[Int], guard: (Int, Int) => Boolean): Set[Position] = {
+      val potentials = for (x <- offsets; y <- offsets; if (guard(x,y))) yield position.get.^(x).flatMap(_.>(y))
       potentials.filter(_.isDefined).filter(pos => pieces(pos.get)
               .map(piece => piece.colour.equals(opposingColour)).getOrElse(true)).map(_.get)
     }
 
+    def knightRing = ring(Set(-2, -1, 1, 2), (x: Int, y: Int) => abs(x)!=abs(y))
+    def kingRing = ring(Set(-1, 0, 1), (x: Int, y: Int) => x!=0 || y!=0)
+    def bishopMoves = expand(v,>) ++ expand(v,<) ++ expand(^,>) ++ expand(^,<)
+    def rookMoves = expand(<) ++ expand(^) ++ expand(>) ++ expand(v)
 
     if (isInPlay) {
       role match {
         case Pawn => forward ++ diagonals ++ enpassant
-        case Rook => expand(<) ++ expand(^) ++ expand(>) ++ expand(v)
-        case Bishop => expand(v,>) ++ expand(v,<) ++ expand(^,>) ++ expand(^,<)
+        case Rook => rookMoves
+        case Bishop => bishopMoves
         case Knight => knightRing
+        case Queen => rookMoves ++ bishopMoves
+        case King => kingRing
         case _ => Set()
       }
     } else Set()

@@ -225,3 +225,40 @@ object KnightSpec extends PieceSpecification {
   }
 }
 
+object QueenSpec extends PieceSpecification {
+  "a queen" should {
+    "not be able to move from starting position" in {
+      val game = new Game
+      val queen = (game pieceAt 'd1 get)
+      game findMovesFor queen must beEmpty
+    }
+
+    "be able to move along ranks, files and diagonals until blocked" in {
+      val game = new Game
+      val queen = Piece(Black, Queen)
+      game place queen at 'f5
+      game findMovesFor queen must containPositions('f2, 'f3, 'f4, 'f6, 'a5, 'b5, 'c5, 'd5, 'e5, 'g5, 'h5,
+        'g6, 'e4, 'd3, 'c2, 'h3, 'g4, 'e6)
+    }
+  }
+}
+
+object KingSpec extends PieceSpecification {
+  "a king" should {
+    "not be able to move from starting position" in {
+      val game = new Game
+      val king = (game pieceAt 'e1 get)
+      game findMovesFor king must beEmpty
+    }
+    "be able to move one space in any direction when none place it in check" in {
+      val game = new Game
+      val king = Piece(White, King)
+      game place king at 'd4
+      game findMovesFor king must containPositions('c3, 'c4, 'c5, 'd3, 'd5, 'e3, 'e4, 'e5)
+    }
+    "be able to castle with the king's rook" in {
+      // todo - quite a pickle!
+    }
+  }
+}
+
