@@ -3,7 +3,7 @@ package au.com.loftinspace.scalachess.game
 import org.specs._
 import Positioning._
 
-object MoveSpec extends Specification with SystemContexts {
+object MoveSpec extends PieceSpecification {
   "a move" should {
     "describe the piece being moved" in {
       val piece = Piece(White, Bishop)
@@ -95,6 +95,4 @@ object MoveSpec extends Specification with SystemContexts {
       Move(Piece(Black, Pawn), position('a2), position('b3), None).isPawnLaunch must beFalse
     }
   }
-
-  private def containPositions(s: Symbol*) = containAll(s.map(position(_)))
 }

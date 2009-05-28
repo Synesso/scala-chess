@@ -44,7 +44,7 @@ object GameSpec extends Specification with SystemContexts {
     }
 
     "reset and replace the pieces on the board to the starting positions".withA(game) { game =>
-      val pieces = Rook :: Bishop :: Knight :: Queen :: King :: Knight :: Bishop :: Rook :: Nil
+      val pieces = Rook :: Knight :: Bishop :: Queen :: King :: Bishop :: Knight :: Rook :: Nil
       game.reset
       for (file <- 'a' to 'h') {
         game pieceAt Symbol(file.toString + 1) must beSome[Piece].which(_ == Piece(White, pieces(file-'a')))

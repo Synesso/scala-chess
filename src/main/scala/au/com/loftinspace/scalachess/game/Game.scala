@@ -6,7 +6,7 @@ import Positioning._
 
 class Game {
   private val CoordinatePattern = new Regex("^[a-h][1-8]$")
-  private val LineUp = Rook :: Bishop :: Knight :: Queen :: King :: Knight :: Bishop :: Rook :: Nil
+  private val LineUp = Rook :: Knight :: Bishop :: Queen :: King :: Bishop :: Knight :: Rook :: Nil
 
   private var pieces: Map[Position, Option[Piece]] = new HashMap[Position, Option[Piece]]
   private var piecesCaptured: List[Piece] = Nil

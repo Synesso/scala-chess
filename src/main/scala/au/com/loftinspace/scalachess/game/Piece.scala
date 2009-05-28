@@ -60,7 +60,9 @@ case class Piece(colour: Colour, role: Role) {
 
     def expand(direction: (Position=>Option[Position])*): Set[Position] = {
       def next(p: Position, accumulator: Set[Position], direction: Array[(Position=>Option[Position])]): Set[Position] = {
-        val nextPositionOpt = direction.foldLeft(Some(p): Option[Position]){(currentPos, nextMove) => currentPos.flatMap(nextMove(_))}
+        val nextPositionOpt = direction.foldLeft(Some(p): Option[Position]){
+          (currentPos, nextMove) => currentPos.flatMap(nextMove(_))
+        }
         val nextColourOpt = nextPositionOpt.flatMap(pieces(_)).map(piece => (piece.colour))
         nextColourOpt.map(nextColour => return if (nextColour.equals(colour)) accumulator else accumulator + nextPositionOpt.get)
         nextPositionOpt.map(nextPos => return next(nextPos, accumulator + nextPos, direction))
@@ -69,16 +71,29 @@ case class Piece(colour: Colour, role: Role) {
       next(position.get, Set(), direction.toArray)
     }
 
+    def follow(moves: (Position=>Option[Position])*) =
+      moves.foldLeft(position) {(current, transform) => current.flatMap(pos => transform(pos))}
+
     def ^(p: Position) = p ^ 1
     def >(p: Position) = p > 1
     def v(p: Position) = p v 1
     def <(p: Position) = p < 1
+
+    def knightRing: Set[Position] = {
+      import Math.abs
+      val offsets = Set(-2, -1, 1, 2)
+      val potentials = for (x <- offsets; y <- offsets; if(abs(x)!=abs(y))) yield position.get.^(x).flatMap(_.>(y))
+      potentials.filter(_.isDefined).filter(pos => pieces(pos.get)
+              .map(piece => piece.colour.equals(opposingColour)).getOrElse(true)).map(_.get)
+    }
+
 
     if (isInPlay) {
       role match {
         case Pawn => forward ++ diagonals ++ enpassant
         case Rook => expand(<) ++ expand(^) ++ expand(>) ++ expand(v)
         case Bishop => expand(v,>) ++ expand(v,<) ++ expand(^,>) ++ expand(^,<)
+        case Knight => knightRing
         case _ => Set()
       }
     } else Set()

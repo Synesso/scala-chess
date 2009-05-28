@@ -26,6 +26,22 @@ object PositionSpecs extends Specification {
       (pos < 4) must beNone
     }
 
+    "be able to calculate a relative position with negative numbers" in {
+      val pos = position('d5)
+      (pos ^ -2) must beSome[Position].which(_.equals(position('d3)))
+      (pos > -3) must beSome[Position].which(_.equals(position('a5)))
+      (pos v -1) must beSome[Position].which(_.equals(position('d6)))
+      (pos < -3) must beSome[Position].which(_.equals(position('g5)))
+    }
+
+    "be used to calculate a non-position off the edge of the board using negative numbers" in {
+      val pos = position('d5)
+      (pos ^ -6) must beNone
+      (pos v -6) must beNone
+      (pos > -6) must beNone
+      (pos < -6) must beNone
+    }
+
     "advise if it is along the same rank as another position" in {
       for (one <- validPositions; another <- validPositions) {
         if (one.rank == another.rank) {

@@ -22,7 +22,7 @@ case class Move(val piece: Piece, val from: Position, val to: Position, val taki
     } else if (from -? to) {
       for (file <- minFile to maxFile) traversed += position((to.rank, file))
     } else if (from /? to) {
-      for (file <- minFile to maxFile; rank <- minRank to maxRank) traversed += position((rank, file))
+      for (file <- minFile to maxFile; rank <- minRank to maxRank; if (rank-from.rank == file-from.file)) traversed += position((rank, file))
     }
     traversed = traversed.-(from, to)
     traversed

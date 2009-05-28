@@ -16,10 +16,11 @@ object Positioning {
 }
 
 case class Position(rank: Int, file: Int) {
-  def ^(n: Int): Option[Position] = if (rank + n <= 8) Some(Position(rank + n, file)) else None
-  def >(n: Int): Option[Position] = if (file + n <= 8) Some(Position(rank, file + n)) else None
-  def v(n: Int): Option[Position] = if (rank - n >= 1) Some(Position(rank - n, file)) else None
-  def <(n: Int): Option[Position] = if (file - n >= 1) Some(Position(rank, file - n)) else None
+  val validValues = 1 to 8
+  def ^(n: Int): Option[Position] = if (validValues.contains(rank + n)) Some(Position(rank + n, file)) else None
+  def >(n: Int): Option[Position] = if (validValues.contains(file + n)) Some(Position(rank, file + n)) else None
+  def v(n: Int): Option[Position] = this ^ (n * -1)
+  def <(n: Int): Option[Position] = this > (n * -1)
   def -?(other: Position) = rank == other.rank
   def |?(other: Position) = file == other.file
   def /?(other: Position) = abs(file - other.file) == abs(rank - other.rank)
