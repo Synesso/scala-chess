@@ -215,6 +215,13 @@ object KnightSpec extends PieceSpecification {
       val knight = (game pieceAt 'b1 get)
       game findMovesFor knight must containPositions('a3, 'c3)
     }
+
+    "be able to move to vacant positions from anywhere" in {
+      val game = new Game
+      val knight = (game pieceAt 'b8 get)
+      game place knight at 'f4
+      game findMovesFor knight must containPositions('e2, 'g2, 'd3, 'h3, 'e6, 'g6, 'd5, 'h5)
+    }
   }
 }
 
