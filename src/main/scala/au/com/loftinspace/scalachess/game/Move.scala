@@ -29,7 +29,18 @@ case class Move(val piece: Piece, val from: Position, val to: Position, val taki
   }
 
   def traversed(s: Symbol) = traversing.contains(position(s))
-  
+
+  def implies: Option[Move] = {
+    val rank = if (piece.colour.equals(White)) 1 else 8
+    if (piece.role.equals(King))
+      if (from.equals(Position(rank, 5)) && to.equals(Position(rank, 7)))
+        Some(Move(Piece(piece.colour, Rook), Position(rank, 8), Position(rank, 6), None))
+      else if (from.equals(Position(rank, 5)) && to.equals(Position(rank, 3)))
+        Some(Move(Piece(piece.colour, Rook), Position(rank, 1), Position(rank, 4), None))
+      else None
+    else None
+  }
+
   //  todo - PGN
 
   override def toString = piece.colour.toString + piece.role + ":" + from + (if (taking.isDefined) "x" else "-") + to

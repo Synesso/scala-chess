@@ -95,4 +95,50 @@ object MoveSpec extends PieceSpecification {
       Move(Piece(Black, Pawn), position('a2), position('b3), None).isPawnLaunch must beFalse
     }
   }
+
+  "a black king moving two spaces towards file h from starting position" should {
+    "imply movement of the king's side rook" in {
+      Move(Piece(Black, King), position('e8), position('g8), None).implies must beSome[Move]
+              .which(_.equals(Move(Piece(Black, Rook), position('h8), position('f8), None)))
+    }
+  }
+
+  "a black king moving two spaces towards file a from starting position" should {
+    "imply movement of the queen's side rook" in {
+      Move(Piece(Black, King), position('e8), position('c8), None).implies must beSome[Move]
+              .which(_.equals(Move(Piece(Black, Rook), position('a8), position('d8), None)))
+    }
+  }
+
+  "a white king moving two spaces towards file h from starting position" should {
+    "imply movement of the king's side rook" in {
+      Move(Piece(White, King), position('e1), position('g1), None).implies must beSome[Move]
+              .which(_.equals(Move(Piece(White, Rook), position('h1), position('f1), None)))
+    }
+  }
+
+  "a white king moving two spaces towards file a from starting position" should {
+    "imply movement of the queen's side rook" in {
+      Move(Piece(White, King), position('e1), position('c1), None).implies must beSome[Move]
+              .which(_.equals(Move(Piece(White, Rook), position('a1), position('d1), None)))
+    }
+  }
+  
+  "a piece other than a king moving two spaces towards file a from king's starting position" should {
+    "imply nothing" in {
+      Move(Piece(White, Queen), position('e1), position('c1), None).implies must beNone
+    }
+  }
+
+  "a piece other than a king moving two spaces towards file h from king's starting position" should {
+    "imply nothing" in {
+      Move(Piece(White, Queen), position('e1), position('c1), None).implies must beNone
+    }
+  }
+
+  "a king moving two spaces in other conditions" should {
+    "imply nothing (though is not legal)" in {
+      Move(Piece(White, King), position('e4), position('e6), None).implies must beNone
+    }
+  }
 }

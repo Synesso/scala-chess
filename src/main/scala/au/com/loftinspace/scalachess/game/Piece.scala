@@ -25,7 +25,6 @@ case class Piece(colour: Colour, role: Role) {
 
   var captured = false
   var hasMoved = false
-  var lastMoveWasPawnLaunch = false;
   var position: Option[Position] = None
 
   def opposingColour = opposite of colour
