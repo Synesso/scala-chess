@@ -13,7 +13,8 @@ class Game {
   private var movesMade: List[Move] = Nil
 
   reset
-  
+
+  def piecesMap = pieces
   def capturedPieces = piecesCaptured
 
   def move(s: Symbol) = new Movement(pieceAt(s))
@@ -60,13 +61,15 @@ class Game {
     }
   }
 
-  def findMovesFor(p: Piece): Set[Position] = {
-    p.movesWithinContext(pieces, moves.lastOption)
-  }
+  def findMovesFor(p: Piece): Set[Position] = p.movesWithinContext(this, moves.lastOption)
 
   def pieceAt(p: Position) = pieces(p)
   def pieceAt(s: Symbol): Option[Piece] = pieceAt(position(s))
   def pieceAt(rank: Int, file: Int): Option[Piece] = pieceAt(Position(rank, file))
+  def piecesAt(positions: List[Position]): List[Option[Piece]] = positions.map(pieceAt(_))
+
+  def presents(scenario: Map[Symbol, Option[Piece]]) =
+    scenario.foldLeft(true) { (res, entry) => res && pieces(position(entry._1)).equals(entry._2) }
 
   def reset = {
     for (file <- 'a' to 'h'; rank <- 1 to 8) {
@@ -93,4 +96,11 @@ class Game {
       println
     }
   }
+}
+
+object Scenarios {
+  val WhiteKingsRookCastle = Map('e1->Some(Piece(White, King)), 'f1->None, 'g1->None, 'h1->Some(Piece(White, Rook)))
+  val WhiteQueensRookCastle = Map('e1->Some(Piece(White, King)), 'd1->None, 'c1->None, 'b1->None, 'a1->Some(Piece(White, Rook)))
+  val BlackKingsRookCastle = Map('e8->Some(Piece(Black, King)), 'f8->None, 'g8->None, 'h8->Some(Piece(Black, Rook)))
+  val BlackQueensRookCastle = Map('e8->Some(Piece(Black, King)), 'd8->None, 'c8->None, 'b8->None, 'a8->Some(Piece(Black, Rook)))
 }

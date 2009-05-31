@@ -12,16 +12,11 @@ trait Colour
 case object White extends Colour
 case object Black extends Colour
 
-object opposite {
-  def of (c: Colour) = c match {
-    case Black => White
-    case White => Black
-  }
-}
-
 case class Piece(colour: Colour, role: Role) {
+  import Positioning.{^,>,v,<}
   import scala.collection.immutable.HashSet
   import Math.abs
+  import Scenarios._
 
   var captured = false
   var hasMoved = false
@@ -30,8 +25,8 @@ case class Piece(colour: Colour, role: Role) {
   def opposingColour = opposite of colour
   def isInPlay = position.isDefined && !captured
 
-  def movesWithinContext(pieces: Map[Position, Option[Piece]], lastMove: Option[Move]): Set[Position] = {
-
+  def movesWithinContext(game: Game, lastMove: Option[Move]): Set[Position] = {
+    val pieces = game.piecesMap
     val moveForwardBy: (Int) => Option[Position] = if (colour.equals(White)) position.get.^ else position.get.v
 
     def forward = {
@@ -57,6 +52,17 @@ case class Piece(colour: Colour, role: Role) {
               .map(move => Position((move.to.rank + move.from.rank) /2, move.to.file)).toList
     }
 
+    def castling = {
+      colour match {
+        case Black => Set(
+          (if (game presents BlackKingsRookCastle) Some(Position(8, 7)) else None),
+          (if (game presents BlackQueensRookCastle) Some(Position(8, 3)) else None)).filter(_.isDefined).map(_.get)
+        case White => Set(
+          (if (game presents WhiteKingsRookCastle) Some(Position(1, 7)) else None),
+          (if (game presents WhiteQueensRookCastle) Some(Position(1, 3)) else None)).filter(_.isDefined).map(_.get)
+      }
+    }
+
     def expand(direction: (Position=>Option[Position])*): Set[Position] = {
       def next(p: Position, accumulator: Set[Position], direction: Array[(Position=>Option[Position])]): Set[Position] = {
         val nextPositionOpt = direction.foldLeft(Some(p): Option[Position]){
@@ -72,11 +78,6 @@ case class Piece(colour: Colour, role: Role) {
 
     def follow(moves: (Position=>Option[Position])*) =
       moves.foldLeft(position) {(current, transform) => current.flatMap(pos => transform(pos))}
-
-    def ^(p: Position) = p ^ 1
-    def >(p: Position) = p > 1
-    def v(p: Position) = p v 1
-    def <(p: Position) = p < 1
 
     def ring(offsets: Set[Int], guard: (Int, Int) => Boolean): Set[Position] = {
       val potentials = for (x <- offsets; y <- offsets; if (guard(x,y))) yield position.get.^(x).flatMap(_.>(y))
@@ -96,11 +97,18 @@ case class Piece(colour: Colour, role: Role) {
         case Bishop => bishopMoves
         case Knight => knightRing
         case Queen => rookMoves ++ bishopMoves
-        case King => kingRing
+        case King => kingRing ++ castling
         case _ => Set()
       }
     } else Set()
   }
 
   override def toString = colour + " " + role
+}
+
+object opposite {
+  def of (c: Colour) = c match {
+    case Black => White
+    case White => Black
+  }
 }

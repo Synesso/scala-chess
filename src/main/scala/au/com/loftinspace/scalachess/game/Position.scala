@@ -1,11 +1,15 @@
 package au.com.loftinspace.scalachess.game
 
 import scala.util.matching.Regex
-import Math.abs
+import Math.{abs,min,max}
 
 object Positioning {
   def position(s: Symbol): Position = position(coordinateToTuple(s))
   def position(rankAndFile: Tuple2[Int, Int]): Position = Position(rankAndFile._1, rankAndFile._2)
+  def ^(p: Position): Option[Position] = p ^ 1
+  def >(p: Position): Option[Position] = p > 1
+  def v(p: Position): Option[Position] = p v 1
+  def <(p: Position): Option[Position] = p < 1
 
   private val CoordinatePattern = new Regex("^[a-h][1-8]$")
 
@@ -24,6 +28,13 @@ case class Position(rank: Int, file: Int) {
   def -?(other: Position) = rank == other.rank
   def |?(other: Position) = file == other.file
   def /?(other: Position) = abs(file - other.file) == abs(rank - other.rank)
+  def ^^(n: Int): List[Position] = expand(n, List(Some(this)), Positioning.^).filter(_.isDefined).map(_.get).reverse
+  def >>(n: Int): List[Position] = expand(n, List(Some(this)), Positioning.>).filter(_.isDefined).map(_.get).reverse
+  def vv(n: Int): List[Position] = expand(n, List(Some(this)), Positioning.v).filter(_.isDefined).map(_.get).reverse
+  def <<(n: Int): List[Position] = expand(n, List(Some(this)), Positioning.<).filter(_.isDefined).map(_.get).reverse
   def fileAsLetter = (96 + file).toChar.toString
   override def toString = fileAsLetter + rank
+  private def expand(i: Int, accumulator: List[Option[Position]], direct: Position => Option[Position]): List[Option[Position]] = {
+    if (i > 0 && accumulator.first.isDefined) expand(i-1, direct(accumulator.first.get) :: accumulator, direct) else accumulator
+  }
 }

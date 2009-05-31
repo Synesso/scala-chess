@@ -2,8 +2,9 @@ package au.com.loftinspace.scalachess.game
 
 import org.specs._
 import Positioning._
+import GameContexts._
 
-object PieceSpec extends PieceSpecification {
+object PieceSpec extends GameSpecification {
   "a piece that is taken" should {
     val takenPiece = systemContext {
       val game = new Game
@@ -21,7 +22,7 @@ object PieceSpec extends PieceSpecification {
   }
 }
 
-object PawnSpec extends PieceSpecification {
+object PawnSpec extends GameSpecification {
   "a pawn that has not yet moved" should {
     val newGame = systemContext {new Game}
     "be able to move either one or two spaces towards opposite colour".withA(newGame) {
@@ -174,7 +175,7 @@ object PawnSpec extends PieceSpecification {
   }
 }
 
-object RookSpec extends PieceSpecification {
+object RookSpec extends GameSpecification {
   "a rook" should {
     "not be able to move from starting position" in {
       val game = new Game
@@ -191,7 +192,7 @@ object RookSpec extends PieceSpecification {
   }
 }
 
-object BishopSpec extends PieceSpecification {
+object BishopSpec extends GameSpecification {
   "a bishop" should {
     "not be able to move from starting position" in {
       val game = new Game
@@ -208,7 +209,7 @@ object BishopSpec extends PieceSpecification {
   }
 }
 
-object KnightSpec extends PieceSpecification {
+object KnightSpec extends GameSpecification {
   "a knight" should {
     "be able to move to vacant positions from starting position" in {
       val game = new Game
@@ -225,7 +226,7 @@ object KnightSpec extends PieceSpecification {
   }
 }
 
-object QueenSpec extends PieceSpecification {
+object QueenSpec extends GameSpecification {
   "a queen" should {
     "not be able to move from starting position" in {
       val game = new Game
@@ -243,22 +244,42 @@ object QueenSpec extends PieceSpecification {
   }
 }
 
-object KingSpec extends PieceSpecification {
+object KingSpec extends GameSpecification {
   "a king" should {
     "not be able to move from starting position" in {
       val game = new Game
       val king = (game pieceAt 'e1 get)
       game findMovesFor king must beEmpty
     }
+
     "be able to move one space in any direction when none place it in check" in {
       val game = new Game
       val king = Piece(White, King)
       game place king at 'd4
       game findMovesFor king must containPositions('c3, 'c4, 'c5, 'd3, 'd5, 'e3, 'e4, 'e5)
     }
-    "be able to castle with the king's rook" in {
-      // todo - quite a pickle!
+
+    "be able to castle with the king's rook".withA(progressedGame) { game =>
+      val king = (game pieceAt 'e1 get)
+      game findMovesFor king must containPositions('f1, 'g1, 'd2, 'e2)
     }
+
+    "be able to castle with the queen's rook".withA(progressedGame) { game =>
+      game move 'd1 to 'd3
+      game move 'd8 to 'd6
+      val king = (game pieceAt 'e1 get)
+      game findMovesFor king must containPositions('f1, 'g1, 'd2, 'e2, 'c1, 'd1)
+    }
+
+    /* todo - castling conditions:
+    - king has already moved
+    - rook has already moved
+    - king passes through check
+    - rook is under attack (ok)
+    - rook passes through square under attack (ok)
+    - king is in check after move.
+    - piece in rook's position is not the rook 
+     */
   }
 }
 

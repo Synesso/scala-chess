@@ -1,9 +1,12 @@
 package au.com.loftinspace.scalachess.game
 
 import org.specs._
+import matcher.Matcher
 import Positioning._
 
 object GameSpec extends Specification with SystemContexts {
+  import GameContexts._
+
   "a game" should {
     val game = systemContext{ new Game }
 
@@ -58,6 +61,12 @@ object GameSpec extends Specification with SystemContexts {
       }
     }
 
+    "provide a list of piece options given a list of positions".withA(game) { game =>
+      val positions = position('a8) :: position('d7) :: position('g4) :: position('d7) :: Nil
+      val pieces = Some(Piece(Black, Rook)) :: Some(Piece(Black, Pawn)) :: None :: Some(Piece(Black, Pawn)) :: Nil
+      game piecesAt positions must containInOrder(pieces)
+    }
+
     "keep a record of the taken pieces".withA(game) { game =>
       val rook = (game pieceAt 'a1).get
       val bishop = (game pieceAt 'c8).get
@@ -104,5 +113,45 @@ object GameSpec extends Specification with SystemContexts {
         Move(blackPawn, position('d7), position('d5), None),
         Move(whitePawn, position('e4), position('d5), Some(blackPawn))))
     }
+/*
+
+    "move the king's rook when the king is castling to king's side".withA(progressedGame) { game =>
+      val whiteKing = (game pieceAt 'e1).get
+      val whiteKingsRook = (game pieceAt 'h1).get
+      game move 'e1 to 'g1
+      game.moves.last must imply(Move(whiteKingsRook, position('h1), position('f1), None))
+//      whiteKingsRook.position must beSome[Piece].which(_.equals(position('f1)))
+//      game pieceAt 'h1 must beNone
+    }
+ */
+
+    "report whether the board matches a given subset of positions".withA(progressedGame) { game =>
+      val scenario = Map('e1 -> Some(Piece(White, King)), 'f1 -> None, 'g1 -> None, 'h1 -> Some(Piece(White, Rook)))
+      game presents scenario must beTrue
+      val unmatchedScenario = Map('d1 -> Some(Piece(White, King)), 'f1 -> None, 'g1 -> None, 'h1 -> Some(Piece(White, Rook)))
+      game presents unmatchedScenario must beFalse
+    }
+  }
+  case class imply(move: Move) extends Matcher[Move] {
+    def apply(m: => Move) = (move equals m, "expected " + move + " and got it", "expected " + move + ", but got " + m)
+  }
+}
+
+object GameContexts extends SystemContexts {
+  val progressedGame = systemContext {
+    val game = new Game
+    game move 'e2 to 'e4
+    game move 'e7 to 'e5
+    game move 'd2 to 'd4
+    game move 'd7 to 'd5
+    game move 'g1 to 'f3
+    game move 'g8 to 'f6
+    game move 'b1 to 'c3
+    game move 'b8 to 'c6
+    game move 'f1 to 'c4
+    game move 'f8 to 'c5
+    game move 'c1 to 'f4
+    game move 'c8 to 'f5
+    game
   }
 }

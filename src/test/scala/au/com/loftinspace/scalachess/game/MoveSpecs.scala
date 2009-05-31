@@ -3,7 +3,7 @@ package au.com.loftinspace.scalachess.game
 import org.specs._
 import Positioning._
 
-object MoveSpec extends PieceSpecification {
+object MoveSpec extends GameSpecification {
   "a move" should {
     "describe the piece being moved" in {
       val piece = Piece(White, Bishop)
@@ -136,8 +136,8 @@ object MoveSpec extends PieceSpecification {
     }
   }
 
-  "a king moving two spaces in other conditions" should {
-    "imply nothing (though is not legal)" in {
+  "a king moving two spaces in other conditions (though is not legal)" should {
+    "imply nothing" in {
       Move(Piece(White, King), position('e4), position('e6), None).implies must beNone
     }
   }

@@ -4,7 +4,7 @@ import org.specs._
 import Positioning._
 import Math.abs
 
-object PositionSpecs extends Specification {
+object PositionSpecs extends GameSpecification {
 
   val validPositions = for (rank <- 1 to 8; file <- 1 to 8) yield position(rank, file)
 
@@ -40,6 +40,22 @@ object PositionSpecs extends Specification {
       (pos v -6) must beNone
       (pos > -6) must beNone
       (pos < -6) must beNone
+    }
+
+    "be used to derive a relative list of positions" in {
+      val pos = position('d4)
+      (pos ^^ 3) must containPositions('d4, 'd5, 'd6, 'd7)
+      (pos >> 3) must containPositions('d4, 'e4, 'f4, 'g4)
+      (pos vv 3) must containPositions('d4, 'd3, 'd2, 'd1)
+      (pos << 3) must containPositions('d4, 'c4, 'b4, 'a4)
+    }
+
+    "be used to derive a relative list of positions not including those off the board" in {
+      val pos = position('d4)
+      (pos ^^ 8) must containPositions('d4, 'd5, 'd6, 'd7, 'd8)
+      (pos >> 8) must containPositions('d4, 'e4, 'f4, 'g4, 'h4)
+      (pos vv 8) must containPositions('d4, 'd3, 'd2, 'd1)
+      (pos << 8) must containPositions('d4, 'c4, 'b4, 'a4)
     }
 
     "advise if it is along the same rank as another position" in {
