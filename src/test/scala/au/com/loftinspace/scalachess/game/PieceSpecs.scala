@@ -260,25 +260,81 @@ object KingSpec extends GameSpecification {
     }
 
     "be able to castle with the king's rook".withA(progressedGame) { game =>
-      val king = (game pieceAt 'e1 get)
-      game findMovesFor king must containPositions('f1, 'g1, 'd2, 'e2)
+      val whiteKing = (game pieceAt 'e1 get)
+      val blackKing = (game pieceAt 'e8 get)
+      game findMovesFor blackKing must containPositions('f8, 'g8, 'd7, 'e7)
+      game findMovesFor whiteKing must containPositions('f1, 'g1, 'd2, 'e2)
     }
 
     "be able to castle with the queen's rook".withA(progressedGame) { game =>
       game move 'd1 to 'd3
       game move 'd8 to 'd6
-      val king = (game pieceAt 'e1 get)
-      game findMovesFor king must containPositions('f1, 'g1, 'd2, 'e2, 'c1, 'd1)
+      val blackKing = (game pieceAt 'e8 get)
+      val whiteKing = (game pieceAt 'e1 get)
+      game findMovesFor blackKing must containPositions('f8, 'g8, 'd7, 'e7, 'c8, 'd8)
+      game findMovesFor whiteKing must containPositions('f1, 'g1, 'd2, 'e2, 'c1, 'd1)
+    }
+
+    "not be able to castle when the king has previously moved".withA(progressedGame) { game =>
+      game move 'd1 to 'd3
+      game move 'd8 to 'd6
+      game move 'e1 to 'e2
+      game move 'e8 to 'e7
+      game move 'e2 to 'e1
+      game move 'e7 to 'e8
+      val blackKing = (game pieceAt 'e8 get)
+      val whiteKing = (game pieceAt 'e1 get)
+      game findMovesFor blackKing must containPositions('f8, 'd7, 'e7, 'd8)
+      game findMovesFor whiteKing must containPositions('f1, 'd2, 'e2, 'd1)
+    }
+
+    "not be able to castle with the king's rook when the rook has previously moved".withA(progressedGame) { game =>
+      game move 'h1 to 'g1
+      game move 'h8 to 'g8
+      game move 'g1 to 'h1
+      game move 'g8 to 'h8
+      val whiteKing = (game pieceAt 'e1 get)
+      val blackKing = (game pieceAt 'e8 get)
+      game findMovesFor blackKing must containPositions('f8, 'd7, 'e7)
+      game findMovesFor whiteKing must containPositions('f1, 'd2, 'e2)
+    }
+
+    "not be able to castle with the queens's rook when the rook has previously moved".withA(progressedGame) { game =>
+      game move 'd1 to 'd3
+      game move 'd8 to 'd6
+      game move 'a1 to 'b1
+      game move 'a8 to 'b8
+      game move 'b1 to 'a1
+      game move 'b8 to 'a8
+      val whiteKing = (game pieceAt 'e1 get)
+      val blackKing = (game pieceAt 'e8 get)
+      game findMovesFor blackKing must containPositions('f8, 'd8, 'd7, 'e7, 'g8)
+      game findMovesFor whiteKing must containPositions('f1, 'd1, 'd2, 'e2, 'g1)
+    }
+
+    "not be able to castle when there is a piece between king and rook".withA(progressedGame) { game =>
+      game place Piece(White, Pawn) at 'g1
+      game place Piece(Black, Pawn) at 'g8
+      val whiteKing = (game pieceAt 'e1 get)
+      val blackKing = (game pieceAt 'e8 get)
+      game findMovesFor blackKing must containPositions('d7, 'e7, 'f8)
+      game findMovesFor whiteKing must containPositions('d2, 'e2, 'f1)
+    }
+
+    "not be able to castle when the piece in the rook's place is not a rook".withA(progressedGame) { game =>
+      game place Piece(White, Bishop) at 'h1
+      game place Piece(Black, Bishop) at 'h8
+      val whiteKing = (game pieceAt 'e1 get)
+      val blackKing = (game pieceAt 'e8 get)
+      game findMovesFor blackKing must containPositions('d7, 'e7, 'f8)
+      game findMovesFor whiteKing must containPositions('d2, 'e2, 'f1)
     }
 
     /* todo - castling conditions:
-    - king has already moved
-    - rook has already moved
     - king passes through check
     - rook is under attack (ok)
     - rook passes through square under attack (ok)
     - king is in check after move.
-    - piece in rook's position is not the rook 
      */
   }
 }

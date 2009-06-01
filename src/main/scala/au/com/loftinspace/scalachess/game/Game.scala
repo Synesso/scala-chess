@@ -16,6 +16,7 @@ class Game {
 
   def piecesMap = pieces
   def capturedPieces = piecesCaptured
+  def moves = movesMade
 
   def move(s: Symbol) = new Movement(pieceAt(s))
   case class Movement(p: Option[Piece]) {
@@ -85,7 +86,12 @@ class Game {
     }
   }
 
-  def moves = movesMade
+  def arrange(layout: Map[Symbol, Piece]) = {
+    for (rank <- 1 to 8; file <- 'a' to 'h') {
+      val symbol = Symbol(file.toString + rank)
+      pieces = pieces.update(position(symbol), layout.get(symbol))
+    }
+  }
 
   def printout = {
     for (rank <- 8 to 1 by -1) {

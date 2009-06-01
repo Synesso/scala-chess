@@ -53,13 +53,14 @@ case class Piece(colour: Colour, role: Role) {
     }
 
     def castling = {
+      if (hasMoved) Set() else
       colour match {
         case Black => Set(
-          (if (game presents BlackKingsRookCastle) Some(Position(8, 7)) else None),
-          (if (game presents BlackQueensRookCastle) Some(Position(8, 3)) else None)).filter(_.isDefined).map(_.get)
+          (if ((game presents BlackKingsRookCastle) && !(game pieceAt 'h8 get).hasMoved) Some(Position(8, 7)) else None),
+          (if ((game presents BlackQueensRookCastle) && !(game pieceAt 'a8 get).hasMoved) Some(Position(8, 3)) else None)).filter(_.isDefined).map(_.get)
         case White => Set(
-          (if (game presents WhiteKingsRookCastle) Some(Position(1, 7)) else None),
-          (if (game presents WhiteQueensRookCastle) Some(Position(1, 3)) else None)).filter(_.isDefined).map(_.get)
+          (if ((game presents WhiteKingsRookCastle) && !(game pieceAt 'h1 get).hasMoved) Some(Position(1, 7)) else None),
+          (if ((game presents WhiteQueensRookCastle) && !(game pieceAt 'a1 get).hasMoved) Some(Position(1, 3)) else None)).filter(_.isDefined).map(_.get)
       }
     }
 

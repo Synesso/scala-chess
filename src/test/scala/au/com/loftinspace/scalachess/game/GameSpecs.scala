@@ -61,6 +61,21 @@ object GameSpec extends Specification with SystemContexts {
       }
     }
 
+    "arrange the board to a given position".withA(game) { game =>
+      val layout = Map('e1 -> Piece(White, Rook), 'f8 -> Piece(White, Pawn), 'a6 -> Piece(Black, Queen))
+      game arrange layout
+      for (rank <- 1 to 8; file <- 'a' to 'h') {
+        val posLabel = Symbol(file.toString + rank)
+        val expected = posLabel match {
+          case 'e1 => Some(Piece(White, Rook))
+          case 'f8 => Some(Piece(White, Pawn))
+          case 'a6 => Some(Piece(Black, Queen))
+          case _ => None
+        }
+        game pieceAt posLabel must_== expected
+      }
+    }
+
     "provide a list of piece options given a list of positions".withA(game) { game =>
       val positions = position('a8) :: position('d7) :: position('g4) :: position('d7) :: Nil
       val pieces = Some(Piece(Black, Rook)) :: Some(Piece(Black, Pawn)) :: None :: Some(Piece(Black, Pawn)) :: Nil
