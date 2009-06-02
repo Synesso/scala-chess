@@ -72,6 +72,11 @@ class Game {
   def presents(scenario: Map[Symbol, Option[Piece]]) =
     scenario.foldLeft(true) { (res, entry) => res && pieces(position(entry._1)).equals(entry._2) }
 
+  def pendingThreatsFor(colour: Colour): Set[Seq[Position]] = {
+    val king = pieces.find((entry: (Position, Option[Piece])) => entry._2.equals(Some(Piece(colour, King)))).get._2.get
+    king pendingThreats this
+  }
+
   def reset = {
     for (file <- 'a' to 'h'; rank <- 1 to 8) {
       val coord = position(Symbol(file.toString + rank))
@@ -89,7 +94,10 @@ class Game {
   def arrange(layout: Map[Symbol, Piece]) = {
     for (rank <- 1 to 8; file <- 'a' to 'h') {
       val symbol = Symbol(file.toString + rank)
-      pieces = pieces.update(position(symbol), layout.get(symbol))
+      val pos = position(symbol)
+      val pieceOpt = layout.get(symbol)
+      pieces = pieces.update(pos, pieceOpt)
+      pieceOpt.foreach(_.position = Some(pos))
     }
   }
 

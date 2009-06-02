@@ -104,6 +104,59 @@ case class Piece(colour: Colour, role: Role) {
     } else Set()
   }
 
+  def pendingThreats(game: Game): Set[Seq[Position]] = {
+    // if one of our pieces, then an opposing queen, bishop (diags only) or rook (rankfiles only)
+    // then this is a threat.
+
+    // expand ...
+    // if edge of board, fail
+    // if first piece is opposite colour, fail
+    // if second piece is same colour, fail
+    // if rank or file and second piece is queen or rook, pass - add it
+    // if diagonal and second piece is queen or bishop, pass -add it
+
+    // todo - check function does not ascertain role of opposing piece.
+/*
+    def check(direction: (Position=>Option[Position])*): List[Position] = {
+      def next(p: Position, accumulator: (List[Position], Option[Piece]), direction: Array[(Position=>Option[Position])]): List[Position] = {
+        val nextPositionOpt = direction.foldLeft(Some(p): Option[Position]) { (currrentPos, nextMove) => currentPos.flatMap(nextMove(_)) }
+        // if next position is not present, exit with Nil
+        if (nextPositionOpt.isEmpty) return Nil
+        val nextPieceOpt = nextPositionOpt.flatMap(pieces(_))
+        nextPieceOpt.get match {
+          case Some(Piece(col, rol)) => {
+            accumulator._2 match {
+              case Some(Piece(accCol, accRol)) => {
+                if (col.equals(colour))
+                  // if next piece is same colour && accum piece is set, exit with Nil
+                  return Nil
+                else
+                  // if next piece is opposite colour && accum piece is set, exit with position :: accum._1
+                  return nextPositionOpt.get :: accumulator._1
+              }
+              case None => {
+                if (col.equals(colour))
+                  // if next piece is same colour && accum piece is not set, set it, add position & continue
+                  return next(nextPositionOpt.get, (nextPositionOpt.get :: accumulator._1, nextPieceOpt, direction))
+                else
+                  // if next piece is opposite colour && accum piece is not set, exit with Nil
+                  return Nil
+              }
+            }
+          }
+          // if next piece is not present, add position & continue
+          case None => return next(nextPositionOpt.get, (nextPositionOpt.get :: accumulator._1, accumulator._2), direction)
+        }
+      }
+      next(position.get, (Nil, None), direction.toArray)
+    }
+*/
+
+    // todo - for each rank/file check for queen or rooks
+    // todo - for each diagonal check for queen or bishops
+    Set()
+  }
+
   override def toString = colour + " " + role
 }
 
