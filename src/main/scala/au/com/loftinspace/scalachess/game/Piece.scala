@@ -13,7 +13,7 @@ case object White extends Colour
 case object Black extends Colour
 
 case class Piece(colour: Colour, role: Role) {
-  import Positioning.{^,>,v,<}
+  import Positioning.{^,>,v,<,noop}
   import scala.collection.immutable.HashSet
   import Math.abs
   import Scenarios._
@@ -64,17 +64,16 @@ case class Piece(colour: Colour, role: Role) {
       }
     }
 
-    def expand(direction: (Position=>Option[Position])*): Set[Position] = {
-      def next(p: Position, accumulator: Set[Position], direction: Array[(Position=>Option[Position])]): Set[Position] = {
-        val nextPositionOpt = direction.foldLeft(Some(p): Option[Position]){
-          (currentPos, nextMove) => currentPos.flatMap(nextMove(_))
+    def expand(direction: (Option[Position]=>Option[Position])*): Set[Position] = {
+      def next(p: Option[Position], accumulator: Set[Position], direction: Array[(Option[Position]=>Option[Position])]): Set[Position] = {
+        val nextPositionOpt = direction.foldLeft(p: Option[Position]){
+          (currentPos, nextMove) => nextMove(currentPos)
         }
         val nextColourOpt = nextPositionOpt.flatMap(pieces(_)).map(piece => (piece.colour))
         nextColourOpt.map(nextColour => return if (nextColour.equals(colour)) accumulator else accumulator + nextPositionOpt.get)
-        nextPositionOpt.map(nextPos => return next(nextPos, accumulator + nextPos, direction))
-        accumulator
+        if (nextPositionOpt.isDefined) next(nextPositionOpt, accumulator + nextPositionOpt.get, direction) else accumulator
       }
-      next(position.get, Set(), direction.toArray)
+      next(position, Set(), direction.toArray)
     }
 
     def follow(moves: (Position=>Option[Position])*) =
@@ -91,7 +90,41 @@ case class Piece(colour: Colour, role: Role) {
     def bishopMoves = expand(v,>) ++ expand(v,<) ++ expand(^,>) ++ expand(^,<)
     def rookMoves = expand(<) ++ expand(^) ++ expand(>) ++ expand(v)
 
-    if (isInPlay) {
+    def exposesKing(target: Position) = {
+      def expandAndCollect(current: Option[Position], rankMove: (Option[Position] => Option[Position]),
+                           fileMove: (Option[Position] => Option[Position]), collected: Set[Position]): (Set[Position], Option[Piece]) = {
+        val next = rankMove(fileMove(current))
+        if (next.isEmpty) return (collected, None)
+        val piece = game pieceAt (next.get)
+        if (piece.isEmpty) expandAndCollect(next, rankMove, fileMove, collected + next.get)
+        else (collected, piece)
+      }
+
+      val positionOfKing = (game positionsOf Piece(colour, King))(0)
+      if (position.get *? positionOfKing) {
+        val rankMoves: Seq[Option[Position] => Option[Position]] = position.get.rank - positionOfKing.rank match {
+          case r if r < 0 => Seq(^, v)
+          case r if r > 0 => Seq(v, ^)
+          case _ => Seq(noop, noop)
+        }
+        val fileMoves: Seq[Option[Position] => Option[Position]] = position.get.file - positionOfKing.file match {
+          case f if f < 0 => Seq(<, >)
+          case f if f > 0 => Seq(>, <)
+          case _ => Seq(noop, noop)
+        }
+        val expansionToKing: (Set[Position], Option[Piece]) = expandAndCollect(position, rankMoves(0), fileMoves(0), Set())
+        val expansionFromKing: (Set[Position], Option[Piece]) = expandAndCollect(position, rankMoves(1), fileMoves(1), Set())
+        if (expansionToKing._1.contains(target) || expansionFromKing._1.contains(target)) false else
+        expansionFromKing._2 match {
+          case Some(Piece(opposingColour, Queen)) => true
+          case Some(Piece(opposingColour, Bishop)) => position.get /? positionOfKing
+          case Some(Piece(opposingColour, Rook)) => (position.get |? positionOfKing) || (position.get -? positionOfKing)
+          case _ => false
+        }
+      } else false
+    }
+
+    val candidatePositions: Set[Position] = if (isInPlay) {
       role match {
         case Pawn => forward ++ diagonals ++ enpassant
         case Rook => rookMoves
@@ -102,59 +135,8 @@ case class Piece(colour: Colour, role: Role) {
         case _ => Set()
       }
     } else Set()
-  }
 
-  def pendingThreats(game: Game): Set[Seq[Position]] = {
-    // if one of our pieces, then an opposing queen, bishop (diags only) or rook (rankfiles only)
-    // then this is a threat.
-
-    // expand ...
-    // if edge of board, fail
-    // if first piece is opposite colour, fail
-    // if second piece is same colour, fail
-    // if rank or file and second piece is queen or rook, pass - add it
-    // if diagonal and second piece is queen or bishop, pass -add it
-
-    // todo - check function does not ascertain role of opposing piece.
-/*
-    def check(direction: (Position=>Option[Position])*): List[Position] = {
-      def next(p: Position, accumulator: (List[Position], Option[Piece]), direction: Array[(Position=>Option[Position])]): List[Position] = {
-        val nextPositionOpt = direction.foldLeft(Some(p): Option[Position]) { (currrentPos, nextMove) => currentPos.flatMap(nextMove(_)) }
-        // if next position is not present, exit with Nil
-        if (nextPositionOpt.isEmpty) return Nil
-        val nextPieceOpt = nextPositionOpt.flatMap(pieces(_))
-        nextPieceOpt.get match {
-          case Some(Piece(col, rol)) => {
-            accumulator._2 match {
-              case Some(Piece(accCol, accRol)) => {
-                if (col.equals(colour))
-                  // if next piece is same colour && accum piece is set, exit with Nil
-                  return Nil
-                else
-                  // if next piece is opposite colour && accum piece is set, exit with position :: accum._1
-                  return nextPositionOpt.get :: accumulator._1
-              }
-              case None => {
-                if (col.equals(colour))
-                  // if next piece is same colour && accum piece is not set, set it, add position & continue
-                  return next(nextPositionOpt.get, (nextPositionOpt.get :: accumulator._1, nextPieceOpt, direction))
-                else
-                  // if next piece is opposite colour && accum piece is not set, exit with Nil
-                  return Nil
-              }
-            }
-          }
-          // if next piece is not present, add position & continue
-          case None => return next(nextPositionOpt.get, (nextPositionOpt.get :: accumulator._1, accumulator._2), direction)
-        }
-      }
-      next(position.get, (Nil, None), direction.toArray)
-    }
-*/
-
-    // todo - for each rank/file check for queen or rooks
-    // todo - for each diagonal check for queen or bishops
-    Set()
+    candidatePositions.filter(candidate => !exposesKing(candidate))
   }
 
   override def toString = colour + " " + role

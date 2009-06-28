@@ -4,7 +4,7 @@ import org.specs._
 import matcher.Matcher
 import Positioning._
 
-object GameSpecs extends Specification with GameContexts {
+object GameSpecs extends GameSpecification {
 
   "a game" should {
     "report what piece is at any coordinate".withA(game) { game =>
@@ -12,6 +12,14 @@ object GameSpecs extends Specification with GameContexts {
       game place pawn at 'e6
       game pieceAt 'e6 must beSome[Piece].which(_.equals(pawn))
       game pieceAt 'f6 must beNone
+    }
+
+    "report what coordinate a piece of a given type is at".withA(progressedGame) { game =>
+      game positionsOf Piece(Black, Queen) must containPositions('d8)
+    }
+
+    "report what coordinates pieces of a given type are at".withA(progressedGame) { game =>
+      game positionsOf Piece(White, Bishop) must containPositions('c4, 'f4)
     }
 
     "provide the taken piece, if any, when a move is made".withA(game) { game =>
@@ -151,12 +159,6 @@ object GameSpecs extends Specification with GameContexts {
       game presents scenario must beTrue
       val unmatchedScenario = Map('d1 -> Some(Piece(White, King)), 'f1 -> None, 'g1 -> None, 'h1 -> Some(Piece(White, Rook)))
       game presents unmatchedScenario must beFalse
-    }
-
-    "report the pending threat lines for a given king when one piece intervenes".withA(game) { game =>
-      game arrange Map('e1 -> Piece(White, King), 'e2 -> Piece(White, Pawn), 'e8 -> Piece(Black, Rook))
-      val threats = game pendingThreatsFor White
-      threats must beEmpty // todo - continue to test
     }
   }
   case class imply(move: Move) extends Matcher[Move] {

@@ -160,15 +160,6 @@ object PawnSpec extends GameSpecification {
       game findMovesFor pawn must containPositions('f3)
     }
   }
-
-  "a pawn that is blocking its king from being in check" should {
-    "not be able to move" in {
-      val game = new Game
-      val pawn = Piece(White, Pawn)
-      game arrange Map('e1 -> Piece(White, King), 'd2 -> pawn, 'b4 -> Piece(Black, Bishop))
-      game findMovesFor pawn must beEmpty
-    }
-  }
 }
 
 object RookSpec extends GameSpecification {
@@ -345,25 +336,6 @@ object KingSpec extends GameSpecification {
       game findMovesFor blackKing must containPositions('c8, 'd8, 'd7, 'e7, 'f7, 'f8)
       game findMovesFor whiteKing must containPositions('c1, 'd1, 'd2, 'e2, 'f2, 'f1)
     }
-
-    "be able to determine lines of pending threat in a new game" in {
-      val game = new Game
-      game pendingThreatsFor Black must beEmpty
-      game pendingThreatsFor White must beEmpty
-    }
-
-    "be able to determine a line of pending threat along a rank" in {
-      val game = new Game
-      game arrange Map('e1 -> Piece(White, King), 'f1 -> Piece(White, Bishop), 'h1 -> Piece(Black, Rook),
-        'e8 -> Piece(Black, King), 'f8 -> Piece(Black, Bishop), 'h8 -> Piece(White, Rook))
-      game pendingThreatsFor Black must containAll(positions('f8, 'g8, 'h8))
-      game pendingThreatsFor White must containAll(positions('f1, 'g1, 'h1))
-    }
-
-    /* todo - castling conditions:
-    - king passes through check.
-    - king is in check after move.
-     */
   }
 }
 

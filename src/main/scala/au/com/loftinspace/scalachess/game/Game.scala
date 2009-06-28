@@ -63,6 +63,7 @@ class Game {
   }
 
   def findMovesFor(p: Piece): Set[Position] = p.movesWithinContext(this, moves.lastOption)
+  def findMovesFor(s: Symbol): Set[Position] = pieceAt(s).map(findMovesFor(_)).getOrElse(Set())
 
   def pieceAt(p: Position) = pieces(p)
   def pieceAt(s: Symbol): Option[Piece] = pieceAt(position(s))
@@ -72,10 +73,7 @@ class Game {
   def presents(scenario: Map[Symbol, Option[Piece]]) =
     scenario.foldLeft(true) { (res, entry) => res && pieces(position(entry._1)).equals(entry._2) }
 
-  def pendingThreatsFor(colour: Colour): Set[Seq[Position]] = {
-    val king = pieces.find((entry: (Position, Option[Piece])) => entry._2.equals(Some(Piece(colour, King)))).get._2.get
-    king pendingThreats this
-  }
+  def positionsOf(p: Piece) = pieces.filter(_._2.equals(Some(p))).keySet.toSeq
 
   def reset = {
     for (file <- 'a' to 'h'; rank <- 1 to 8) {
