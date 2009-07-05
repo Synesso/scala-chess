@@ -6,10 +6,6 @@ import Math.{abs,min,max}
 object Positioning {
   def position(s: Symbol): Position = position(coordinateToTuple(s))
   def position(rankAndFile: Tuple2[Int, Int]): Position = Position(rankAndFile._1, rankAndFile._2)
-//  def ^(p: Position): Option[Position] = p ^ 1
-//  def >(p: Position): Option[Position] = p > 1
-//  def v(p: Position): Option[Position] = p v 1
-//  def <(p: Position): Option[Position] = p < 1
   def ^(p: Option[Position]): Option[Position] = p.flatMap(_ ^ 1)
   def >(p: Option[Position]): Option[Position] = p.flatMap(_ > 1)
   def v(p: Option[Position]): Option[Position] = p.flatMap(_ v 1)

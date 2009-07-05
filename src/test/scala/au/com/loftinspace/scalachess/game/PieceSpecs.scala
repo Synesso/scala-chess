@@ -3,6 +3,21 @@ package au.com.loftinspace.scalachess.game
 import org.specs._
 import Positioning._
 
+/*
+object PawnSpec extends GameSpecification {
+  "a pawn" should {
+    "be able to move two spaces towards opposite colour if it has not moved" in {}
+    "be able to move one space towards opposite colour" in {}
+    "not be able to move two spaces towards opposite colour if it is blocked by same colour despite having not moved" in {}
+    "not be able to move one space towards opposite colour if it is blocked by same colour"
+    "not be able to move two spaces towards opposite colour if it is blocked by opposing colour despite having not moved" in {}
+    "not be able to move one space towards opposite colour if it is blocked by opposing colour" in {}
+    "be able to "
+  }
+}
+*/
+
+/*
 object PieceSpec extends GameSpecification {
   "a piece that is taken" should {
     val takenPiece = systemContext {
@@ -338,4 +353,5 @@ object KingSpec extends GameSpecification {
     }
   }
 }
+*/
 

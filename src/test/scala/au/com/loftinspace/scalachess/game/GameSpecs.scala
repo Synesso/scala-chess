@@ -7,6 +7,7 @@ import Positioning._
 object GameSpecs extends GameSpecification {
 
   "a game" should {
+/*
     "report what piece is at any coordinate".withA(game) { game =>
       val pawn = Piece(Black, Pawn)
       game place pawn at 'e6
@@ -160,6 +161,7 @@ object GameSpecs extends GameSpecification {
       val unmatchedScenario = Map('d1 -> Some(Piece(White, King)), 'f1 -> None, 'g1 -> None, 'h1 -> Some(Piece(White, Rook)))
       game presents unmatchedScenario must beFalse
     }
+*/
   }
   case class imply(move: Move) extends Matcher[Move] {
     def apply(m: => Move) = (move equals m, "expected " + move + " and got it", "expected " + move + ", but got " + m)
@@ -168,6 +170,7 @@ object GameSpecs extends GameSpecification {
 
 trait GameContexts extends SystemContexts {
   val game = systemContext{ new Game }
+/*
   val progressedGame = systemContext {
     val game = new Game
     game move 'e2 to 'e4
@@ -184,4 +187,5 @@ trait GameContexts extends SystemContexts {
     game move 'c8 to 'f5
     game
   }
+*/
 }

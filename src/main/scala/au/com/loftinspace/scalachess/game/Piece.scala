@@ -1,5 +1,7 @@
 package au.com.loftinspace.scalachess.game
 
+import Positioning.{^, >, v, <}
+
 trait Role
 case object King extends Role
 case object Queen extends Role
@@ -12,6 +14,55 @@ trait Colour
 case object White extends Colour
 case object Black extends Colour
 
+case class Piece(colour: Colour, role: Role) {
+  def opposingColour = opposite of colour
+
+  /**
+   * Find the moves this piece can make from the given position.
+   * @return A map of position sequences to a function that takes a board and a position and returns an IterationControl
+   */
+  def movesFrom(pos: Position) = {
+    type BoardQuery = (Board, Position) => IterationControl
+    type BoardOperation = Board => Board
+    val resultSeed = Map.empty[List[Position], (BoardQuery, Option[BoardOperation])]
+
+    def capturePattern(board: Board, square: Position) =
+      board.pieces.get(square).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Continue)
+
+    def expand(direction: Seq[Option[Position] => Option[Position]]): List[Position] = {
+      def next(acc: List[Position]): List[Position] = {
+        val seed: Option[Position] = Some(acc.firstOption.getOrElse(pos))
+        val candidate = direction.foldLeft(seed) {(intermediate, step) => step(intermediate)}
+        candidate match {
+          case Some(p) => next(p :: acc)
+          case None => acc
+        }
+      }
+      next(Nil).reverse
+    }
+
+    role match {
+      case King => {
+        val positions = (for (rank <- -1 to 1; file <- -1 to 1; if (rank != 0 || file != 0)) yield (pos ^ rank).flatMap(_ < file)).filter(_.isDefined).map(_.get)
+        positions.foldLeft(resultSeed) {(acc, next) => acc(List(next)) = (capturePattern, None)}
+      }
+      case Queen => {
+        val directions = List(List(^ _), List(> _), List(v _), List(< _),
+          List(^ _, < _), List(^ _, > _), List(v _, < _), List(v _, > _))
+        val positions = directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
+        positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (capturePattern, None)}
+      }
+      case _ => Map.empty[List[Position], (BoardQuery, Option[BoardOperation])]
+    }
+  }
+}
+
+trait IterationControl
+case object Continue extends IterationControl
+case object IncludeAndStop extends IterationControl
+case object Stop extends IterationControl
+
+/*
 case class Piece(colour: Colour, role: Role) {
   import Positioning.{^,>,v,<,noop}
   import scala.collection.immutable.HashSet
@@ -141,9 +192,10 @@ case class Piece(colour: Colour, role: Role) {
 
   override def toString = colour + " " + role
 }
+*/
 
 object opposite {
-  def of (c: Colour) = c match {
+  def of(c: Colour) = c match {
     case Black => White
     case White => Black
   }

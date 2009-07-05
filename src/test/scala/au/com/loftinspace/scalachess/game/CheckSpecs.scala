@@ -4,7 +4,7 @@ import org.specs._
 import Positioning._
 
 object CheckSpecs extends GameSpecification {
-  "A pawn that protects its king from check" should {
+  /*"A pawn that protects its king from check" should {
     "not be able to move if it would expose the king to check from an opposing bishop" in {
       val game = new Game
       game arrange Map('b4 -> Piece(Black, Bishop), 'd2 -> Piece(White, Pawn), 'e1 -> Piece(White, King))
@@ -14,4 +14,5 @@ object CheckSpecs extends GameSpecification {
 
     }
   }
+*/
 }

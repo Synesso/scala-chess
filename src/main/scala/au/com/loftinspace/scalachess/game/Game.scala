@@ -5,6 +5,7 @@ import scala.util.matching.Regex
 import Positioning._
 
 class Game {
+/*
   private val CoordinatePattern = new Regex("^[a-h][1-8]$")
   private val LineUp = Rook :: Knight :: Bishop :: Queen :: King :: Bishop :: Knight :: Rook :: Nil
 
@@ -108,6 +109,7 @@ class Game {
       println
     }
   }
+*/
 }
 
 object Scenarios {

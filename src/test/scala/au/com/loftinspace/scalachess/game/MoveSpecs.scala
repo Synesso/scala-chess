@@ -4,6 +4,7 @@ import org.specs._
 import Positioning._
 
 object MoveSpec extends GameSpecification {
+/*
   "a move" should {
     "describe the piece being moved" in {
       val piece = Piece(White, Bishop)
@@ -141,4 +142,5 @@ object MoveSpec extends GameSpecification {
       Move(Piece(White, King), position('e4), position('e6), None).implies must beNone
     }
   }
+*/
 }
