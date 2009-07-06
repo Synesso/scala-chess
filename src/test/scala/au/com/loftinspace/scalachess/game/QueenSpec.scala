@@ -6,6 +6,9 @@ object QueenSpec extends GameSpecification {
   "a queen" should {
 
     val queen = Piece(Black, Queen)
+    def boardWithQueenAt(pos: Position) = new Board(Map(pos -> queen), Nil)
+    val board = boardWithQueenAt(position('d4))
+
 
     "be able to move in any direction until the edge of the board" in {
       queen.movesFrom(position('d4)).keySet must containPositionLists(
@@ -21,7 +24,6 @@ object QueenSpec extends GameSpecification {
     }
 
     "require that positions can only be moved to if they aren't occupied by the same colour" in {
-      val board = new Board
       queen.movesFrom(position('d4)).elements.foreach {
         element =>
                 val position = element._1(0)
@@ -32,8 +34,19 @@ object QueenSpec extends GameSpecification {
       }
     }
 
-    "not invoke the movement of other pieces" in {
-      queen.movesFrom(position('h4)).values.foreach {query => query._2 must beNone}
+    "invoke the correct board movements if the option is taken" in {
+      queen.movesFrom(position('d4)).elements.foreach {
+        element =>
+                val toPosition = element._1(0)
+                val implication = element._2._2
+                val boardAfterMove = boardWithQueenAt(toPosition)
+                val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
+                val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
+                val boardAfterPieceIsTaken = new Board(boardWithQueenAt(toPosition).pieces, Piece(White, Pawn) :: Nil)
+                implication(board, toPosition) must_== boardAfterMove
+                implication(boardWithBlackPieceAtTarget, toPosition) must throwAn[IllegalMoveException]
+                implication(boardWithWhitePieceAtTarget, toPosition) must_== boardAfterPieceIsTaken
+      }
     }
   }
 }

@@ -23,11 +23,17 @@ case class Piece(colour: Colour, role: Role) {
    */
   def movesFrom(pos: Position) = {
     type BoardQuery = (Board, Position) => IterationControl
-    type BoardOperation = Board => Board
-    val resultSeed = Map.empty[List[Position], (BoardQuery, Option[BoardOperation])]
+    type Implication = (Board, Position) => Board
 
-    def capturePattern(board: Board, square: Position) =
+    val resultSeed = Map.empty[List[Position], (BoardQuery, Implication)]
+
+    def captureQuery(board: Board, square: Position) =
       board.pieces.get(square).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Continue)
+
+    def captureImplication(board: Board, target: Position): Board = {
+      val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
+      (if (capturing) (board take target) else board) move pos to target
+    }
 
     def expand(direction: Seq[Option[Position] => Option[Position]]): List[Position] = {
       def next(acc: List[Position]): List[Position] = {
@@ -44,15 +50,15 @@ case class Piece(colour: Colour, role: Role) {
     role match {
       case King => {
         val positions = (for (rank <- -1 to 1; file <- -1 to 1; if (rank != 0 || file != 0)) yield (pos ^ rank).flatMap(_ < file)).filter(_.isDefined).map(_.get)
-        positions.foldLeft(resultSeed) {(acc, next) => acc(List(next)) = (capturePattern, None)}
+        positions.foldLeft(resultSeed) {(acc, next) => acc(List(next)) = (captureQuery, captureImplication)}
       }
       case Queen => {
         val directions = List(List(^ _), List(> _), List(v _), List(< _),
           List(^ _, < _), List(^ _, > _), List(v _, < _), List(v _, > _))
         val positions = directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
-        positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (capturePattern, None)}
+        positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
       }
-      case _ => Map.empty[List[Position], (BoardQuery, Option[BoardOperation])]
+      case _ => Map.empty[List[Position], (BoardQuery, Implication)]
     }
   }
 }

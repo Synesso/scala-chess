@@ -20,7 +20,7 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) {
       def to(dest: Position) = {
         if (pieces contains dest) throw new IllegalMoveException("Cannot move to occupied " + dest)
         else pieces.get(orig).map(piece => new Board((pieces - orig)(dest) = piece, taken))
-                .getOrElse {throw new IllegalMoveException("No piece at " + orig + "to move")}
+                .getOrElse {throw new IllegalMoveException("No piece at " + orig + " to move")}
       }
     }
     new Movement
