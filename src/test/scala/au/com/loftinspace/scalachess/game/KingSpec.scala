@@ -20,26 +20,30 @@ object KingSpec extends GameSpecification {
       val board = new Board
       king.movesFrom(position('d4)).elements.foreach {
         element =>
-                val position = element._1(0)
                 val query = element._2._1
-                query(board, position) must_== Continue
-                query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position) must_== IncludeAndStop
-                query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position) must_== Stop
+                element._1.foreach {
+                  position =>
+                          query(board, position) must_== Continue
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position) must_== IncludeAndStop
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position) must_== Stop
+                }
       }
     }
 
     "invoke the correct board movements if the option is taken" in {
       king.movesFrom(position('d4)).elements.foreach {
         element =>
-                val toPosition = element._1(0)
                 val implication = element._2._2
-                val boardAfterMove = boardWithKingAt(toPosition)
-                val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
-                val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                val boardAfterPieceIsTaken = new Board(boardWithKingAt(toPosition).pieces, Piece(White, Pawn) :: Nil)
-                implication(board, toPosition) must_== boardAfterMove
-                implication(boardWithBlackPieceAtTarget, toPosition) must throwAn[IllegalMoveException]
-                implication(boardWithWhitePieceAtTarget, toPosition) must_== boardAfterPieceIsTaken
+                element._1.foreach {
+                  toPosition =>
+                          val boardAfterMove = boardWithKingAt(toPosition)
+                          val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
+                          val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
+                          val boardAfterPieceIsTaken = new Board(boardWithKingAt(toPosition).pieces, Piece(White, Pawn) :: Nil)
+                          implication(board, toPosition) must_== boardAfterMove
+                          implication(boardWithBlackPieceAtTarget, toPosition) must throwAn[IllegalMoveException]
+                          implication(boardWithWhitePieceAtTarget, toPosition) must_== boardAfterPieceIsTaken
+                }
       }
     }
 

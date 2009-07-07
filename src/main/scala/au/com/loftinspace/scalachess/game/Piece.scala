@@ -31,13 +31,23 @@ case class Piece(colour: Colour, role: Role) {
 
     val resultSeed = Map.empty[List[Position], (BoardQuery, Implication)]
 
-    def captureQuery(board: Board, square: Position) =
-      board.pieces.get(square).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Continue)
+    def captureQuery(board: Board, target: Position) =
+      board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Continue)
+    def pawnForwardQuery(board: Board, target: Position) = if (board.pieces.contains(target)) Stop else Continue
+    def pawnDiagonalQuery(board: Board, target: Position) = {
+      board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Stop)
+    }
 
     def captureImplication(board: Board, target: Position): Board = {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
       (if (capturing) (board take target) else board) move pos to target
     }
+    def moveOnlyIfEmptyImplication(board: Board, target: Position): Board = board move pos to target
+    def moveOnlyIfCapturingImplication(board: Board, target: Position): Board = {
+      val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
+      if (capturing) (board take target) move pos to target else throw new IllegalMoveException("Cannot move " + this + " to " + target + " unless capturing") 
+    }
+
 
     def expand(direction: Seq[Option[Position] => Option[Position]]): List[Position] = {
       def next(acc: List[Position]): List[Position] = {
@@ -71,25 +81,16 @@ case class Piece(colour: Colour, role: Role) {
       case Bishop => vectorBasedMoves(bishopVectors)
       case Knight => radialBasedMoves(Set(-2, -1, 1, 2), (rank: Int, file: Int) => {abs(rank) != abs(file)})
       case Rook => vectorBasedMoves(rookVectors)
-/*
       case Pawn => {
-        val forward = (List((pos v 1), (pos v 2))).filter(_.isDefined).map(_.get)
-        val takeLeft = List(<(pos v 1)).filter(_.isDefined).map(_.get)
-        val takeRight = List(>(pos v 1)).filter(_.isDefined).map(_.get)
-*/
-/*
-        val result: Map[List[Position], (BoardQuery, Implication)] =
-          resultSeed + ((forward, (captureQuery, captureImplication)), (takeLeft, (captureQuery, captureImplication)),
-          (takeRight, (captureQuery, captureImplication))).filter(!_._1.isEmpty)
-*/
-/*
-        val result: Map[List[Position], ((Board, Position) => IterationControl, (Board, Position) => Board)] = resultSeed
-          + ((forward, (captureQuery, captureImplication)))
-          + ((takeLeft, (captureQuery, captureImplication)))
-          + ((takeRight, (captureQuery, captureImplication)))
-        result.filter(!_._1.isEmpty)
+        val unmoved = (colour.equals(White) && pos.rank == 2) || (colour.equals(Black) && pos.rank == 7)
+        val fwd: Int => Option[Position] = if (colour.equals(White)) pos.^ else pos.v
+        val onward = (if (unmoved) List((fwd(1)), (fwd(2))) else List((fwd(1)))).filter(_.isDefined).map(_.get)
+        val takeLeft = List(<(fwd(1))).filter(_.isDefined).map(_.get)
+        val takeRight = List(>(fwd(1))).filter(_.isDefined).map(_.get)
+        (resultSeed + ((onward, (pawnForwardQuery _, moveOnlyIfEmptyImplication _)),
+                (takeLeft, (pawnDiagonalQuery _, moveOnlyIfCapturingImplication _)),
+                (takeRight, (pawnDiagonalQuery _, moveOnlyIfCapturingImplication _)))).filter(!_._1.isEmpty)
       }
-*/
       case _ => Map.empty[List[Position], (BoardQuery, Implication)]
     }
   }
