@@ -1,5 +1,7 @@
 package au.com.loftinspace.scalachess.game
 
+//import java.util.{Set, Map, List} // todo - remove me
+//import javax.swing.text.html.Option // todo - remove me
 import Positioning.{^, >, v, <}
 
 trait Role
@@ -55,6 +57,18 @@ case class Piece(colour: Colour, role: Role) {
       case Queen => {
         val directions = List(List(^ _), List(> _), List(v _), List(< _),
           List(^ _, < _), List(^ _, > _), List(v _, < _), List(v _, > _))
+        val positions = directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
+        positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
+      }
+      case Knight => {
+        import Math.abs
+        val positionOffsets = Set(-2, -1, 1, 2)
+        val positions: Set[List[Position]] = for (x <- positionOffsets; y <- positionOffsets; if (abs(x)!=abs(y));
+          val positionOption = (pos > x).flatMap(_ ^ y); if (positionOption.isDefined)) yield List(positionOption.get)
+        positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
+      }
+      case Bishop => {
+        val directions = List(List(^ _, < _), List(^ _, > _), List(v _, < _), List(v _, > _))
         val positions = directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
         positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
       }
