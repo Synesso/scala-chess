@@ -161,4 +161,6 @@ object PawnSpec extends GameSpecification {
     }
   }
 
+  // todo - en passant
+
 }
