@@ -2,24 +2,25 @@ package au.com.loftinspace.scalachess.game
 
 import Positioning._
 
-object KnightSpec extends GameSpecification {
-  "a knight" should {
+object RookSpec extends GameSpecification {
+  "a rook" should {
 
-    val knight = Piece(White, Knight)
-    def boardWithKnightAt(pos: Position) = new Board(Map(pos -> knight), Nil)
-    val board = boardWithKnightAt(position('e4))
+    val rook = Piece(White, Rook)
+    def boardWithRookAt(pos: Position) = new Board(Map(pos -> rook), Nil)
+    val board = boardWithRookAt(position('f6))
 
-    "be able to move in any of 8 positions, 2 and 1 squares away" in {
-      knight.movesFrom(position('e4)).keySet must containPositionLists(
-        List('f6), List('g5), List('g3), List('f2), List('d2), List('c3), List('c5), List('d6))
+    "be able to move to any position along the same rank or file" in {
+      rook.movesFrom(position('e4)).keySet must containPositionLists(
+        List('e5, 'e6, 'e7, 'e8), List('e3, 'e2, 'e1), List('f4, 'g4, 'h4), List('d4, 'c4, 'b4, 'a4))
     }
 
-    "be able to move 2 and 1 squares away, even when at the edges" in {
-      knight.movesFrom(position('h8)).keySet must containPositionLists(List('g6), List('f7))
+    "be able to move to any position along the same rank or file, even when at the edges" in {
+      rook.movesFrom(position('h8)).keySet must containPositionLists(
+        List('h7, 'h6, 'h5, 'h4, 'h3, 'h2, 'h1), List('g8, 'f8, 'e8, 'd8, 'c8, 'b8, 'a8))
     }
 
     "require that positions can only be moved to if they aren't occupied by the same colour" in {
-      knight.movesFrom(position('d4)).elements.foreach {
+      rook.movesFrom(position('d4)).elements.foreach {
         element =>
                 val position = element._1(0)
                 val query = element._2._1
@@ -30,14 +31,14 @@ object KnightSpec extends GameSpecification {
     }
 
     "invoke the correct board movements if the option is taken" in {
-      knight.movesFrom(position('e4)).elements.foreach {
+      rook.movesFrom(position('f6)).elements.foreach {
         element =>
                 val toPosition = element._1(0)
                 val implication = element._2._2
-                val boardAfterMove = boardWithKnightAt(toPosition)
+                val boardAfterMove = boardWithRookAt(toPosition)
                 val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                 val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                val boardAfterPieceIsTaken = new Board(boardWithKnightAt(toPosition).pieces, Piece(Black, Pawn) :: Nil)
+                val boardAfterPieceIsTaken = new Board(boardWithRookAt(toPosition).pieces, Piece(Black, Pawn) :: Nil)
                 implication(board, toPosition) must_== boardAfterMove
                 implication(boardWithWhitePieceAtTarget, toPosition) must throwAn[IllegalMoveException]
                 implication(boardWithBlackPieceAtTarget, toPosition) must_== boardAfterPieceIsTaken

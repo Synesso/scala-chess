@@ -1,6 +1,7 @@
 package au.com.loftinspace.scalachess.game
 
-//import java.util.{Set, Map, List} // todo - remove me
+
+//import java.util.{Collection, Set, Map, List} // todo - remove me
 //import javax.swing.text.html.Option // todo - remove me
 import Positioning.{^, >, v, <}
 
@@ -19,13 +20,14 @@ case object Black extends Colour
 case class Piece(colour: Colour, role: Role) {
   def opposingColour = opposite of colour
 
+  type BoardQuery = (Board, Position) => IterationControl
+  type Implication = (Board, Position) => Board
+
   /**
    * Find the moves this piece can make from the given position.
    * @return A map of position sequences to a function that takes a board and a position and returns an IterationControl
    */
-  def movesFrom(pos: Position) = {
-    type BoardQuery = (Board, Position) => IterationControl
-    type Implication = (Board, Position) => Board
+  def movesFrom(pos: Position): Map[List[Position], (BoardQuery, Implication)] = {
 
     val resultSeed = Map.empty[List[Position], (BoardQuery, Implication)]
 
@@ -49,29 +51,45 @@ case class Piece(colour: Colour, role: Role) {
       next(Nil).reverse
     }
 
+    val rookVectors = List(List(^ _), List(> _), List(v _), List(< _))
+    val bishopVectors = List(List(^ _, < _), List(^ _, > _), List(v _, < _), List(v _, > _))
+    val queenVectors = rookVectors ::: bishopVectors
+    def vectorBasedMoves(directions: List[List[Option[Position] => Option[Position]]]) = {
+      val positions = directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
+      positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
+    }
+    def radialBasedMoves(offsets: Collection[Int], filter: (Int, Int) => Boolean) = {
+      val positions = (for (rank <- offsets; file <- offsets; if (filter(rank, file))) yield (pos ^ rank).flatMap(_ < file)).filter(_.isDefined).map(_.get)
+      positions.foldLeft(resultSeed) {(acc, next) => acc(List(next)) = (captureQuery, captureImplication)}
+    }
+
+    import Math.abs
+
     role match {
-      case King => {
-        val positions = (for (rank <- -1 to 1; file <- -1 to 1; if (rank != 0 || file != 0)) yield (pos ^ rank).flatMap(_ < file)).filter(_.isDefined).map(_.get)
-        positions.foldLeft(resultSeed) {(acc, next) => acc(List(next)) = (captureQuery, captureImplication)}
+      case King => radialBasedMoves(-1 to 1, (rank: Int, file: Int) => {rank != 0 || file != 0})
+      case Queen => vectorBasedMoves(queenVectors)
+      case Bishop => vectorBasedMoves(bishopVectors)
+      case Knight => radialBasedMoves(Set(-2, -1, 1, 2), (rank: Int, file: Int) => {abs(rank) != abs(file)})
+      case Rook => vectorBasedMoves(rookVectors)
+/*
+      case Pawn => {
+        val forward = (List((pos v 1), (pos v 2))).filter(_.isDefined).map(_.get)
+        val takeLeft = List(<(pos v 1)).filter(_.isDefined).map(_.get)
+        val takeRight = List(>(pos v 1)).filter(_.isDefined).map(_.get)
+*/
+/*
+        val result: Map[List[Position], (BoardQuery, Implication)] =
+          resultSeed + ((forward, (captureQuery, captureImplication)), (takeLeft, (captureQuery, captureImplication)),
+          (takeRight, (captureQuery, captureImplication))).filter(!_._1.isEmpty)
+*/
+/*
+        val result: Map[List[Position], ((Board, Position) => IterationControl, (Board, Position) => Board)] = resultSeed
+          + ((forward, (captureQuery, captureImplication)))
+          + ((takeLeft, (captureQuery, captureImplication)))
+          + ((takeRight, (captureQuery, captureImplication)))
+        result.filter(!_._1.isEmpty)
       }
-      case Queen => {
-        val directions = List(List(^ _), List(> _), List(v _), List(< _),
-          List(^ _, < _), List(^ _, > _), List(v _, < _), List(v _, > _))
-        val positions = directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
-        positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
-      }
-      case Knight => {
-        import Math.abs
-        val positionOffsets = Set(-2, -1, 1, 2)
-        val positions: Set[List[Position]] = for (x <- positionOffsets; y <- positionOffsets; if (abs(x)!=abs(y));
-          val positionOption = (pos > x).flatMap(_ ^ y); if (positionOption.isDefined)) yield List(positionOption.get)
-        positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
-      }
-      case Bishop => {
-        val directions = List(List(^ _, < _), List(^ _, > _), List(v _, < _), List(v _, > _))
-        val positions = directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
-        positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
-      }
+*/
       case _ => Map.empty[List[Position], (BoardQuery, Implication)]
     }
   }
