@@ -144,5 +144,35 @@ object BoardSpecs extends Specification {
       )
     }
 
+    "be able to be rewound to a prior state" in {
+      val newBoard = board.reset
+      val afterMove = newBoard move position('a2) to position('a4)
+      val delta = Delta(Map(position('a2) -> (Some(Piece(White, Pawn)), None), position('a4) -> (None, Some(Piece(White, Pawn)))), None)
+      afterMove rewind delta must_== newBoard
+    }
+
+    "be able to be rewound to a prior state, including replacement of captured pieces" in {
+      val newBoard = board.reset.move(position('e2)).to(position('e4)).move(position('d7)).to(position('d5)).take(position('h8))
+      val afterMove = newBoard.take(position('d5)).move(position('e4)).to(position('d5))
+      val delta = Delta(Map(position('e4) -> (Some(Piece(White, Pawn)), None),
+        position('d5) -> (Some(Piece(Black, Pawn)), Some(Piece(White, Pawn)))), Some(Piece(Black, Pawn)))
+      afterMove rewind delta must_== newBoard
+    }
+
+    "be able to be unwound to a future state" in {
+      val newBoard = board.reset
+      val afterMove = newBoard move position('a2) to position('a4)
+      val delta = Delta(Map(position('a2) -> (Some(Piece(White, Pawn)), None), position('a4) -> (None, Some(Piece(White, Pawn)))), None)
+      newBoard unwind delta must_== afterMove
+    }
+
+    "be able to be unwound to a future state, including capturing of pieces" in {
+      val newBoard = board.reset.move(position('e2)).to(position('e4)).move(position('d7)).to(position('d5)).take(position('h8))
+      val afterMove = newBoard.take(position('d5)).move(position('e4)).to(position('d5))
+      val delta = Delta(Map(position('e4) -> (Some(Piece(White, Pawn)), None),
+        position('d5) -> (Some(Piece(Black, Pawn)), Some(Piece(White, Pawn)))), Some(Piece(Black, Pawn)))
+      newBoard unwind delta must_== afterMove
+    }
+
   }
 }

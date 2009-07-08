@@ -2,7 +2,7 @@ package au.com.loftinspace.scalachess.game
 
 import Positioning._
 
-case class Board(pieces: Map[Position, Piece], taken: List[Piece]) {
+case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - boardhistory to be added here.
   def this() = this (Map(), Nil)
 
   def place(p: Piece) = {
@@ -50,4 +50,23 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) {
             })
     new Board(pairs.foldLeft(Map.empty[Position, Piece]) {(acc, next) => acc(next._1) = next._2}, Nil)
   }
+
+  def rewind(delta: Delta) = {
+    val oldPieces = delta.pieces.foldLeft(pieces) {
+      (acc, next) =>
+              if (next._2._1.isDefined) acc(next._1) = next._2._1.get else acc - next._1
+    }
+    new Board(oldPieces, delta.taken.map(taken - _).getOrElse(taken))
+  }
+
+  def unwind(delta: Delta) = {
+    val newPieces = delta.pieces.foldLeft(pieces) {
+      (acc, next) =>
+              if (next._2._2.isDefined) acc(next._1) = next._2._2.get else acc - next._1
+    }
+    new Board(newPieces, delta.taken.map(_ :: taken).getOrElse(taken))
+  }
+
 }
+
+case class Delta(pieces: Map[Position, (Option[Piece], Option[Piece])], taken: Option[Piece])

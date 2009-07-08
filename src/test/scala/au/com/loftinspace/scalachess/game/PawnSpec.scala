@@ -161,6 +161,14 @@ object PawnSpec extends GameSpecification {
     }
   }
 
-  // todo - en passant
+  "a black pawn on rank 4" should {
+    val board = new Board(Map(position('d4) -> blackPawn), Nil)
+
+    "be able to perform en passant if the adjascent piece is a pawn that has moved two spaces in the last move" in {
+      // todo - complete after board has move history...
+    }
+  }
+  
+  // todo - en passant for white pawn too.
 
 }
