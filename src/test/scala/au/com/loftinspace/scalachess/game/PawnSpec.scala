@@ -20,9 +20,9 @@ object PawnSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.filter(_.file.equals(4)).foreach {
                   position =>
-                          query(board, position) must_== Continue
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position) must_== Stop
+                          query(board, position, None) must_== Continue
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== Stop
                 }
       }
     }
@@ -33,9 +33,9 @@ object PawnSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.filter(!_.file.equals(4)).foreach {
                   position =>
-                          query(board, position) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position) must_== IncludeAndStop
+                          query(board, position, None) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== IncludeAndStop
                 }
       }
     }
@@ -49,9 +49,9 @@ object PawnSpec extends GameSpecification {
                           val boardAfterMove = new Board(Map(toPosition -> blackPawn), Nil)
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                          implication(board, toPosition) must_== boardAfterMove
-                          implication(boardWithWhitePieceAtTarget, toPosition) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition) must throwAn[IllegalMoveException]
+                          implication(board, toPosition, None) must_== boardAfterMove
+                          implication(boardWithWhitePieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
                 }
       }
     }
@@ -65,9 +65,9 @@ object PawnSpec extends GameSpecification {
                           val boardAfterTaking = new Board(Map(toPosition -> blackPawn), List(Piece(White, Pawn)))
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                          implication(board, toPosition) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition) must throwAn[IllegalMoveException]
-                          implication(boardWithWhitePieceAtTarget, toPosition) must_== boardAfterTaking
+                          implication(board, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(boardWithWhitePieceAtTarget, toPosition, None) must_== boardAfterTaking
                 }
       }
     }
@@ -86,9 +86,9 @@ object PawnSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.filter(_.file.equals(4)).foreach {
                   position =>
-                          query(board, position) must_== Continue
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position) must_== Stop
+                          query(board, position, None) must_== Continue
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== Stop
                 }
       }
     }
@@ -99,9 +99,9 @@ object PawnSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.filter(!_.file.equals(4)).foreach {
                   position =>
-                          query(board, position) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position) must_== IncludeAndStop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position) must_== Stop
+                          query(board, position, None) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== IncludeAndStop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== Stop
                 }
       }
     }
@@ -115,9 +115,9 @@ object PawnSpec extends GameSpecification {
                           val boardAfterMove = new Board(Map(toPosition -> whitePawn), Nil)
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                          implication(board, toPosition) must_== boardAfterMove
-                          implication(boardWithWhitePieceAtTarget, toPosition) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition) must throwAn[IllegalMoveException]
+                          implication(board, toPosition, None) must_== boardAfterMove
+                          implication(boardWithWhitePieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
                 }
       }
     }
@@ -131,9 +131,9 @@ object PawnSpec extends GameSpecification {
                           val boardAfterTaking = new Board(Map(toPosition -> whitePawn), List(Piece(Black, Pawn)))
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                          implication(board, toPosition) must throwAn[IllegalMoveException]
-                          implication(boardWithWhitePieceAtTarget, toPosition) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition) must_== boardAfterTaking
+                          implication(board, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(boardWithWhitePieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, None) must_== boardAfterTaking
                 }
       }
     }

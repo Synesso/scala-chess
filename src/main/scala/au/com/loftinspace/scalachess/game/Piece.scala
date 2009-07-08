@@ -17,8 +17,8 @@ case object Black extends Colour
 case class Piece(colour: Colour, role: Role) {
   def opposingColour = opposite of colour
 
-  type BoardQuery = (Board, Position) => IterationControl
-  type Implication = (Board, Position) => Board
+  type BoardQuery = (Board, Position, Option[Delta]) => IterationControl
+  type Implication = (Board, Position, Option[Delta]) => Board
 
   /**
    * Find the moves this piece can make from the given position.
@@ -28,19 +28,19 @@ case class Piece(colour: Colour, role: Role) {
 
     val resultSeed = Map.empty[List[Position], (BoardQuery, Implication)]
 
-    def captureQuery(board: Board, target: Position) =
+    def captureQuery(board: Board, target: Position, lastMove: Option[Delta]) =
       board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Continue)
-    def pawnForwardQuery(board: Board, target: Position) = if (board.pieces.contains(target)) Stop else Continue
-    def pawnDiagonalQuery(board: Board, target: Position) = {
+    def pawnForwardQuery(board: Board, target: Position, lastMove: Option[Delta]) = if (board.pieces.contains(target)) Stop else Continue
+    def pawnDiagonalQuery(board: Board, target: Position, lastMove: Option[Delta]) = {
       board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Stop)
     }
 
-    def captureImplication(board: Board, target: Position): Board = {
+    def captureImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
       (if (capturing) (board take target) else board) move pos to target
     }
-    def moveOnlyIfEmptyImplication(board: Board, target: Position): Board = board move pos to target
-    def moveOnlyIfCapturingImplication(board: Board, target: Position): Board = {
+    def moveOnlyIfEmptyImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = board move pos to target
+    def moveOnlyIfCapturingImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
       if (capturing) (board take target) move pos to target else throw new IllegalMoveException("Cannot move " + this + " to " + target + " unless capturing") 
     }

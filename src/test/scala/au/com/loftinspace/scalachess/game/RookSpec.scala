@@ -25,9 +25,9 @@ object RookSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.foreach {
                   position =>
-                          query(board, position) must_== Continue
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position) must_== IncludeAndStop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position) must_== Stop
+                          query(board, position, None) must_== Continue
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== IncludeAndStop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== Stop
                 }
       }
     }
@@ -42,9 +42,9 @@ object RookSpec extends GameSpecification {
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
                           val boardAfterPieceIsTaken = new Board(boardWithRookAt(toPosition).pieces, Piece(Black, Pawn) :: Nil)
-                          implication(board, toPosition) must_== boardAfterMove
-                          implication(boardWithWhitePieceAtTarget, toPosition) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition) must_== boardAfterPieceIsTaken
+                          implication(board, toPosition, None) must_== boardAfterMove
+                          implication(boardWithWhitePieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, None) must_== boardAfterPieceIsTaken
                 }
       }
     }
