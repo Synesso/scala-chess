@@ -32,17 +32,35 @@ case class Piece(colour: Colour, role: Role) {
       board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Continue)
     def pawnForwardQuery(board: Board, target: Position, lastMove: Option[Delta]) = if (board.pieces.contains(target)) Stop else Continue
     def pawnDiagonalQuery(board: Board, target: Position, lastMove: Option[Delta]) = {
-      board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Stop)
+      board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse {
+        val onEnPassantRank = if (colour.equals(White)) pos.rank == 5 else pos.rank == 4
+        val toAndFrom: Set[Position] = Set(Position(pos.rank, target.file), Position(if (colour.equals(White)) target.rank + 1 else target.rank - 1, target.file))
+        if (onEnPassantRank &&
+                board.pieces.get(Position(pos.rank, target.file)).map(_.equals(Piece(opposingColour, Pawn))).getOrElse(false) &&
+                (toAndFrom ** lastMove.map(_.pieces.keySet).getOrElse(Set())).equals(toAndFrom))
+          IncludeAndStop else Stop
+      }
     }
 
     def captureImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
       (if (capturing) (board take target) else board) move pos to target
     }
-    def moveOnlyIfEmptyImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = board move pos to target
-    def moveOnlyIfCapturingImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = {
+    def pawnMoveOnlyIfEmptyImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = board move pos to target
+    def pawnMoveOnlyIfCapturingImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = {
+      val onEnPassantRank = if (colour.equals(White)) pos.rank == 5 else pos.rank == 4
+      
+      lastMove.foreach {
+        move =>
+                println("There was a last move -> " + move)
+                val enPassantTo = move.enPassantTo
+                println("There was an enPassantTo -> " + enPassantTo)
+                if (enPassantTo.map(_.equals(Position(pos.rank, target.file))).getOrElse(false)) {
+                  return (board take enPassantTo.get) move pos to target
+                }
+      }
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
-      if (capturing) (board take target) move pos to target else throw new IllegalMoveException("Cannot move " + this + " to " + target + " unless capturing") 
+      if (capturing) (board take target) move pos to target else throw new IllegalMoveException("Cannot move " + this + " to " + target + " unless capturing")
     }
 
 
@@ -84,9 +102,9 @@ case class Piece(colour: Colour, role: Role) {
         val onward = (if (unmoved) List((fwd(1)), (fwd(2))) else List((fwd(1)))).filter(_.isDefined).map(_.get)
         val takeLeft = List(<(fwd(1))).filter(_.isDefined).map(_.get)
         val takeRight = List(>(fwd(1))).filter(_.isDefined).map(_.get)
-        (resultSeed + ((onward, (pawnForwardQuery _, moveOnlyIfEmptyImplication _)),
-                (takeLeft, (pawnDiagonalQuery _, moveOnlyIfCapturingImplication _)),
-                (takeRight, (pawnDiagonalQuery _, moveOnlyIfCapturingImplication _)))).filter(!_._1.isEmpty)
+        (resultSeed + ((onward, (pawnForwardQuery _, pawnMoveOnlyIfEmptyImplication _)),
+                (takeLeft, (pawnDiagonalQuery _, pawnMoveOnlyIfCapturingImplication _)),
+                (takeRight, (pawnDiagonalQuery _, pawnMoveOnlyIfCapturingImplication _)))).filter(!_._1.isEmpty)
       }
       case _ => Map.empty[List[Position], (BoardQuery, Implication)]
     }

@@ -145,7 +145,7 @@ object PawnSpec extends GameSpecification {
         origin =>
                 val rank = origin.rank
                 blackPawn.movesFrom(origin).keySet must containPositionLists(
-                  List(Symbol("d" + (rank-1))), List(Symbol("c" + (rank-1))), List(Symbol("e" + (rank-1))))
+                  List(Symbol("d" + (rank - 1))), List(Symbol("c" + (rank - 1))), List(Symbol("e" + (rank - 1))))
       }
     }
   }
@@ -156,19 +156,51 @@ object PawnSpec extends GameSpecification {
         origin =>
                 val rank = origin.rank
                 whitePawn.movesFrom(origin).keySet must containPositionLists(
-                  List(Symbol("d" + (rank+1))), List(Symbol("c" + (rank+1))), List(Symbol("e" + (rank+1))))
+                  List(Symbol("d" + (rank + 1))), List(Symbol("c" + (rank + 1))), List(Symbol("e" + (rank + 1))))
       }
     }
   }
 
   "a black pawn on rank 4" should {
-    val board = new Board(Map(position('d4) -> blackPawn), Nil)
+    val board = new Board().place(blackPawn).at('d4).place(whitePawn).at('c4)
 
-    "be able to perform en passant if the adjascent piece is a pawn that has moved two spaces in the last move" in {
-      // todo - complete after board has move history...
+    "be able to perform en passant if the adjacent piece is a pawn that has moved two spaces in the last move" in {
+      val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
+      val lastMove = Delta(Map(position('c4) -> (None, Some(whitePawn)), position('c2) -> (Some(whitePawn), None)), None)
+      query(board, position('c3), Some(lastMove)) must_== IncludeAndStop
+    }
+
+    "not be able to perform en passant if the adjacent piece is a pawn that has not moved two spaces in the last move" in {
+      val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
+      val lastMove = Delta(Map(position('c4) -> (None, Some(whitePawn)), position('c3) -> (Some(whitePawn), None)), None)
+      query(board, position('c3), Some(lastMove)) must_== Stop
+    }
+
+    "not be able to perform en passant if the adjacent piece is not a pawn" in {
+      val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
+      val lastMove = Delta(Map(position('c4) -> (None, Some(Piece(White, Bishop))), position('c3) -> (Some(Piece(White, Bishop)), None)), None)
+      query(board, position('c3), Some(lastMove)) must_== Stop
+    }
+
+    "not be able to perform en passant if there is no adjacent piece" in {
+      val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
+      val lastMove = Delta(Map(position('c4) -> (None, Some(Piece(White, Bishop))), position('c3) -> (Some(Piece(White, Bishop)), None)), None)
+      query(new Board().place(blackPawn).at('d4), position('c3), Some(lastMove)) must_== Stop
+    }
+
+    "not be able to perform en passant if there is no prior move" in {
+      val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
+      query(new Board().place(blackPawn).at('d4), position('c3), None) must_== Stop
+    }
+
+    "invoke the correct board movements if the en passant option is taken" in {
+      val boardAfterMove = board.take(position('c4)).move(position('d4)).to(position('c3))
+      val implication = blackPawn.movesFrom(position('d4))(List(position('c3)))._2
+      val lastMove = Delta(Map(position('c4) -> (None, Some(whitePawn)), position('c2) -> (Some(whitePawn), None)), None)
+      implication(board, position('c3), Some(lastMove)) must_== boardAfterMove
     }
   }
-  
+
   // todo - en passant for white pawn too.
 
 }

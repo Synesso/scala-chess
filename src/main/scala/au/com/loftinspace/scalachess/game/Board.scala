@@ -8,6 +8,7 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
   def place(p: Piece) = {
     case class Placement() {
       def at(s: Symbol): Board = at(position(s))
+
       def at(destination: Position): Board = new Board(pieces(destination) = p, taken)
     }
     new Placement
@@ -69,4 +70,26 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
 
 }
 
-case class Delta(pieces: Map[Position, (Option[Piece], Option[Piece])], taken: Option[Piece])
+case class Delta(pieces: Map[Position, (Option[Piece], Option[Piece])], taken: Option[Piece]) {
+  def enPassantTo: Option[Position] = {
+    if (taken.equals(None) && pieces.size.equals(2)) {
+      val first = pieces.keys.next
+      first.rank match {
+        case 2 if pieces.contains(Position(4, first.file)) &&
+                pieces(first).equals(Some(Piece(White, Pawn)), None) &&
+                pieces(Position(4, first.file)).equals(None, Some(Piece(White, Pawn))) => Some(Position(4, first.file))
+        case 4 if pieces.contains(Position(2, first.file)) &&
+                pieces(first).equals(Some(Piece(White, Pawn)), None) &&
+                pieces(Position(2, first.file)).equals(None, Some(Piece(White, Pawn)))  => Some(first)
+        case 5 if pieces.contains(Position(7, first.file)) &&
+                pieces(first).equals(Some(Piece(Black, Pawn)), None) &&
+                pieces(Position(7, first.file)).equals(None, Some(Piece(Black, Pawn))) => Some(first)
+        case 7 if pieces.contains(Position(5, first.file)) &&
+                pieces(first).equals(Some(Piece(Black, Pawn)), None) &&
+                pieces(Position(5, first.file)).equals(None, Some(Piece(Black, Pawn))) => Some(Position(5, first.file))
+
+        case _ => None
+      }
+    } else None
+  }
+}
