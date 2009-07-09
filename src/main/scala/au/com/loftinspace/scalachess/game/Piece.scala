@@ -49,12 +49,9 @@ case class Piece(colour: Colour, role: Role) {
     def pawnMoveOnlyIfEmptyImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = board move pos to target
     def pawnMoveOnlyIfCapturingImplication(board: Board, target: Position, lastMove: Option[Delta]): Board = {
       val onEnPassantRank = if (colour.equals(White)) pos.rank == 5 else pos.rank == 4
-      
       lastMove.foreach {
         move =>
-                println("There was a last move -> " + move)
                 val enPassantTo = move.enPassantTo
-                println("There was an enPassantTo -> " + enPassantTo)
                 if (enPassantTo.map(_.equals(Position(pos.rank, target.file))).getOrElse(false)) {
                   return (board take enPassantTo.get) move pos to target
                 }

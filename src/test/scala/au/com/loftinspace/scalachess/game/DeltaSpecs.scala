@@ -54,6 +54,16 @@ object DeltaSpecs extends GameSpecification {
       delta.enPassantTo must beNone
     }
 
+    "provide an en passant target regardless of delta map order (for black pawns)" in {
+      val delta = Delta(Map(position('c5) -> (None,Some(Piece(Black,Pawn))), position('c7) -> (Some(Piece(Black,Pawn)),None)),None)
+      delta.enPassantTo must_== Some(position('c5))
+    }
+
+    "provide an en passant target regardless of delta map order (for white pawns)" in {
+      val delta = Delta(Map(position('c4) -> (None,Some(Piece(White,Pawn))), position('c2) -> (Some(Piece(White,Pawn)),None)),None)
+      delta.enPassantTo must_== Some(position('c4))
+    }
+
   }
 
 }

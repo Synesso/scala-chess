@@ -79,11 +79,11 @@ case class Delta(pieces: Map[Position, (Option[Piece], Option[Piece])], taken: O
                 pieces(first).equals(Some(Piece(White, Pawn)), None) &&
                 pieces(Position(4, first.file)).equals(None, Some(Piece(White, Pawn))) => Some(Position(4, first.file))
         case 4 if pieces.contains(Position(2, first.file)) &&
-                pieces(first).equals(Some(Piece(White, Pawn)), None) &&
-                pieces(Position(2, first.file)).equals(None, Some(Piece(White, Pawn)))  => Some(first)
+                pieces(first).equals(None, Some(Piece(White, Pawn))) &&
+                pieces(Position(2, first.file)).equals(Some(Piece(White, Pawn)), None)  => Some(first)
         case 5 if pieces.contains(Position(7, first.file)) &&
-                pieces(first).equals(Some(Piece(Black, Pawn)), None) &&
-                pieces(Position(7, first.file)).equals(None, Some(Piece(Black, Pawn))) => Some(first)
+                pieces(first).equals(None, Some(Piece(Black, Pawn))) &&
+                pieces(Position(7, first.file)).equals(Some(Piece(Black, Pawn)), None) => Some(first)
         case 7 if pieces.contains(Position(5, first.file)) &&
                 pieces(first).equals(Some(Piece(Black, Pawn)), None) &&
                 pieces(Position(5, first.file)).equals(None, Some(Piece(Black, Pawn))) => Some(Position(5, first.file))
