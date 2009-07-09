@@ -63,7 +63,5 @@ object DeltaSpecs extends GameSpecification {
       val delta = Delta(Map(position('c4) -> (None,Some(Piece(White,Pawn))), position('c2) -> (Some(Piece(White,Pawn)),None)),None)
       delta.enPassantTo must_== Some(position('c4))
     }
-
   }
-
 }

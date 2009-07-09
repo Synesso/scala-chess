@@ -3,31 +3,9 @@ package au.com.loftinspace.scalachess.game
 import Positioning._
 import org.specs.Specification
 
-object BoardSpecs extends Specification {
+object BoardSpecs extends GameSpecification {
 
   val board = new Board
-
-/*
-  "the board helper object" should {
-
-    "advise whether a position is unoccupied on a board" in {
-      Board.unoccupied(board, position('a1)) must beTrue
-      Board.unoccupied((board place Piece(White, Knight) at 'e7), position('e7)) must beFalse
-    }
-
-    "advise whether a position is occupied by a black piece" in {
-      Board.occupiedBy(board, position('f3), Black) must beFalse
-      Board.occupiedBy((board place Piece(White, King) at 'f3), position('f3), Black) must beFalse
-      Board.occupiedBy((board place Piece(Black, King) at 'f3), position('f3), Black) must beTrue
-    }
-
-    "advise whether a position is occupied by a white piece" in {
-      Board.occupiedBy(board, position('f3), White) must beFalse
-      Board.occupiedBy((board place Piece(White, King) at 'f3), position('f3), White) must beTrue
-      Board.occupiedBy((board place Piece(Black, King) at 'f3), position('f3), White) must beFalse
-    }
-  }
-*/
 
   "a board" should {
 
@@ -172,6 +150,11 @@ object BoardSpecs extends Specification {
       val delta = Delta(Map(position('e4) -> (Some(Piece(White, Pawn)), None),
         position('d5) -> (Some(Piece(Black, Pawn)), Some(Piece(White, Pawn)))), Some(Piece(Black, Pawn)))
       newBoard unwind delta must_== afterMove
+    }
+
+    "advise which positions from a given side currently threaten a given position (pawns)" in {
+      val newBoard = board.place(Piece(White, Pawn)).at(position('f6))
+      (newBoard threatsTo Black at 'g7) must containPositions('f6)
     }
 
   }

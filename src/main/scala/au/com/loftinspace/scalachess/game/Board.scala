@@ -40,6 +40,26 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
     new Promotion
   }
 
+  /**
+   * Note, will not identify threats to position from en passant. (Not required).
+   */
+  def threatsTo(colour: Colour) = {
+    case class Threat() {
+      def at(s: Symbol): List[Position] = at(position(s))
+      def at(pos: Position): List[Position] = {
+
+        // check forward diagonals for opposing colour pawn
+        // check surrounding 8 squares for opposing colour king
+        // check surrounding 8 knight squares for opposing colour knight
+        // check file and ranks expansions for opposing rook or queen
+        // check diagonal expansions for opposing bishop or queen
+
+        Nil
+      }
+    }
+    new Threat
+  }
+
   def reset = {
     val lineUp = Rook :: Knight :: Bishop :: Queen :: King :: Bishop :: Knight :: Rook :: Nil
     val pairs = for (rank <- 1 :: 2 :: 7 :: 8 :: Nil; file <- 1 to 8) yield (position(rank, file),
