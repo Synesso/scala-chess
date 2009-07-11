@@ -1,6 +1,6 @@
 package au.com.loftinspace.scalachess.game
 
-import Positioning.{^, >, v, <, vectorBasedPositions, radialBasedPositions}
+import Positioning.{^, >, v, <, vectorBasedPositions, radialBasedPositions, position}
 
 trait Role
 case object King extends Role
@@ -70,11 +70,19 @@ case class Piece(colour: Colour, role: Role) {
     def radialBasedMoves(offsets: Collection[Int], filter: (Int, Int) => Boolean) = {
       radialBasedPositions(pos, offsets, filter).foldLeft(resultSeed) {(acc, next) => acc(List(next)) = (captureQuery, captureImplication)}
     }
+    def castlingMoves = {
+      val positions = colour match {
+        case Black if (position('e8).equals(pos)) => Set(List(position('c8)), List(position('g8)))
+        case White if (position('e1).equals(pos)) => Set(List(position('c1)), List(position('g1)))
+        case _ => Set.empty[List[Position]]
+      }
+      positions.foldLeft(resultSeed) {(acc, next) => acc(next) = (captureQuery, captureImplication)}
+    }
 
     import Math.abs
 
     role match {
-      case King => radialBasedMoves(-1 to 1, (rank: Int, file: Int) => {rank != 0 || file != 0})
+      case King => radialBasedMoves(-1 to 1, (rank: Int, file: Int) => {rank != 0 || file != 0}) ++ castlingMoves
       case Queen => vectorBasedMoves(queenVectors)
       case Bishop => vectorBasedMoves(bishopVectors)
       case Knight => radialBasedMoves(Set(-2, -1, 1, 2), (rank: Int, file: Int) => {abs(rank) != abs(file)})
@@ -89,7 +97,7 @@ case class Piece(colour: Colour, role: Role) {
                 (takeLeft, (pawnDiagonalQuery _, pawnMoveOnlyIfCapturingImplication _)),
                 (takeRight, (pawnDiagonalQuery _, pawnMoveOnlyIfCapturingImplication _)))).filter(!_._1.isEmpty)
       }
-      case _ => Map.empty[List[Position], (BoardQuery, Implication)]
+      case _ => resultSeed
     }
   }
 }
