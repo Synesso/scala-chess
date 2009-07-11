@@ -11,6 +11,23 @@ object Positioning {
   def v(p: Option[Position]): Option[Position] = p.flatMap(_ v 1)
   def <(p: Option[Position]): Option[Position] = p.flatMap(_ < 1)
   def noop(p: Option[Position]) = p
+  def vectorBasedPositions(from: Position, directions: List[List[Option[Position] => Option[Position]]]) = {
+    def expand(direction: Seq[Option[Position] => Option[Position]]): List[Position] = {
+      def next(acc: List[Position]): List[Position] = {
+        val seed: Option[Position] = Some(acc.firstOption.getOrElse(from))
+        val candidate = direction.foldLeft(seed) {(intermediate, step) => step(intermediate)}
+        candidate match {
+          case Some(p) => next(p :: acc)
+          case None => acc
+        }
+      }
+      next(Nil).reverse
+    }
+    directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
+  }
+  def radialBasedPositions(from: Position, offsets: Collection[Int], filter: (Int, Int) => Boolean) = {
+    (for (rank <- offsets; file <- offsets; if (filter(rank, file))) yield (from ^ rank).flatMap(_ < file)).filter(_.isDefined).map(_.get)
+  }
 
   private val CoordinatePattern = new Regex("^[a-h][1-8]$")
 

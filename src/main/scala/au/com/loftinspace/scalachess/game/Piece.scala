@@ -1,6 +1,6 @@
 package au.com.loftinspace.scalachess.game
 
-import Positioning.{^, >, v, <}
+import Positioning.{^, >, v, <, vectorBasedPositions, radialBasedPositions}
 
 trait Role
 case object King extends Role
@@ -22,7 +22,7 @@ case class Piece(colour: Colour, role: Role) {
 
   /**
    * Find the moves this piece can make from the given position.
-   * @return A map of position sequences to a function that takes a board and a position and returns an IterationControl
+   * @return A map of position sequences to tuple of BoardQuery and Implication
    */
   def movesFrom(pos: Position): Map[List[Position], (BoardQuery, Implication)] = {
 
@@ -61,28 +61,14 @@ case class Piece(colour: Colour, role: Role) {
     }
 
 
-    def expand(direction: Seq[Option[Position] => Option[Position]]): List[Position] = {
-      def next(acc: List[Position]): List[Position] = {
-        val seed: Option[Position] = Some(acc.firstOption.getOrElse(pos))
-        val candidate = direction.foldLeft(seed) {(intermediate, step) => step(intermediate)}
-        candidate match {
-          case Some(p) => next(p :: acc)
-          case None => acc
-        }
-      }
-      next(Nil).reverse
-    }
-
     val rookVectors = List(List(^ _), List(> _), List(v _), List(< _))
     val bishopVectors = List(List(^ _, < _), List(^ _, > _), List(v _, < _), List(v _, > _))
     val queenVectors = rookVectors ::: bishopVectors
     def vectorBasedMoves(directions: List[List[Option[Position] => Option[Position]]]) = {
-      val positions = directions.foldLeft(Nil: List[List[Position]]) {(acc, next) => expand(next) :: acc}.filter(l => !l.isEmpty)
-      positions.foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
+      vectorBasedPositions(pos, directions).foldLeft(resultSeed) {(acc, listPos) => acc(listPos) = (captureQuery, captureImplication)}
     }
     def radialBasedMoves(offsets: Collection[Int], filter: (Int, Int) => Boolean) = {
-      val positions = (for (rank <- offsets; file <- offsets; if (filter(rank, file))) yield (pos ^ rank).flatMap(_ < file)).filter(_.isDefined).map(_.get)
-      positions.foldLeft(resultSeed) {(acc, next) => acc(List(next)) = (captureQuery, captureImplication)}
+      radialBasedPositions(pos, offsets, filter).foldLeft(resultSeed) {(acc, next) => acc(List(next)) = (captureQuery, captureImplication)}
     }
 
     import Math.abs

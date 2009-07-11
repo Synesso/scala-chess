@@ -2,9 +2,13 @@ package au.com.loftinspace.scalachess.game
 
 import Positioning._
 
-case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - boardhistory to be added here.
+case class Board(pieces: Map[Position, Piece], taken: List[Piece]) {
   def this() = this (Map(), Nil)
 
+  /**
+   * Place a piece on the board (at a position)
+   * @return a new board
+   */
   def place(p: Piece) = {
     case class Placement() {
       def at(s: Symbol): Board = at(position(s))
@@ -14,8 +18,16 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
     new Placement
   }
 
+  /**
+   * Take (capture) the piece at the given position
+   * @return a new board
+   */
   def take(p: Position) = new Board((pieces - p), (pieces(p) :: taken))
 
+  /**
+   * Move the piece at the given position (to a new position)
+   * @return a new board
+   */
   def move(orig: Position) = {
     case class Movement() {
       def to(dest: Position) = {
@@ -27,6 +39,10 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
     new Movement
   }
 
+  /**
+   * Promote the piece at the given position to a new role
+   * @return a new board
+   */
   def promote(p: Position) = {
     case class Promotion() {
       def to(r: Role): Board = r match {
@@ -41,7 +57,9 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
   }
 
   /**
-   * Note, will not identify threats to position from en passant. (Not required).
+   * Finds all positions which contain a threat to the given colour (at a given position).
+   * Note, will not identify threats to position from en passant (as this behaviour is not required).
+   * @return the positions of threat
    */
   def threatsTo(colour: Colour) = {
     case class Threat() {
@@ -77,16 +95,25 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
                 .filter(_.isDefined).foldLeft(Nil: List[Position]) { (acc, next) =>
                   if (opposing(Bishop).at(next.get) || opposing(Queen).at(next.get)) next.get :: acc else acc
         }
+        val knights: List[Position] = {
+          val options = radialBasedPositions(pos, List(-2,-1,1,2), (rank, file) => Math.abs(rank) != Math.abs(file))
+          options.toList.filter(opposing(Knight).at(_))
+        }
+        val kings: List[Position] = {
+          val options = radialBasedPositions(pos, -1 to 1, (rank, file) => (rank != 0 || file != 0))
+          options.toList.filter(opposing(King).at(_))
+        }
 
-        // check surrounding 8 squares for opposing colour king
-        // check surrounding 8 knight squares for opposing colour knight
-
-        pawns ::: rankFileVectors ::: diagonalVectors
+        pawns ::: rankFileVectors ::: diagonalVectors ::: knights ::: kings
       }
     }
     new Threat
   }
 
+  /**
+   * Layout the board for a new game.
+   * @return a new board
+   */
   def reset = {
     val lineUp = Rook :: Knight :: Bishop :: Queen :: King :: Bishop :: Knight :: Rook :: Nil
     val pairs = for (rank <- 1 :: 2 :: 7 :: 8 :: Nil; file <- 1 to 8) yield (position(rank, file),
@@ -99,6 +126,10 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
     new Board(pairs.foldLeft(Map.empty[Position, Piece]) {(acc, next) => acc(next._1) = next._2}, Nil)
   }
 
+  /**
+   * Alter the board to the previous state with the given delta.
+   * @return a new board
+   */
   def rewind(delta: Delta) = {
     val oldPieces = delta.pieces.foldLeft(pieces) {
       (acc, next) =>
@@ -107,6 +138,10 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
     new Board(oldPieces, delta.taken.map(taken - _).getOrElse(taken))
   }
 
+  /**
+   * Alter the board to a future state with the given delta.
+   * @return a new board
+   */
   def unwind(delta: Delta) = {
     val newPieces = delta.pieces.foldLeft(pieces) {
       (acc, next) =>
@@ -118,6 +153,9 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
 }
 
 case class Delta(pieces: Map[Position, (Option[Piece], Option[Piece])], taken: Option[Piece]) {
+  /**
+   * The destination position of an en passant move, if that is what this delta represents.
+   */
   def enPassantTo: Option[Position] = {
     if (taken.equals(None) && pieces.size.equals(2)) {
       val first = pieces.keys.next

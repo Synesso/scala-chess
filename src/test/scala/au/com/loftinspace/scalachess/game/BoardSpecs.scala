@@ -268,4 +268,46 @@ object BoardSpecs extends GameSpecification {
       (newBoard threatsTo White at 'd7) must beEmpty
     }
   }
+
+  "advise which positions currently threaten a given position, given a side (opposing knights)" in {
+    val newBoard = board.place(Piece(Black, Knight)).at(position('f7))
+    (newBoard threatsTo White at 'd8) must containPositions('f7)
+    (newBoard threatsTo White at 'h8) must containPositions('f7)
+    (newBoard threatsTo White at 'd6) must containPositions('f7)
+    (newBoard threatsTo White at 'h6) must containPositions('f7)
+    (newBoard threatsTo White at 'e5) must containPositions('f7)
+    (newBoard threatsTo White at 'g5) must containPositions('f7)
+  }
+
+  "advise which positions currently threaten a given position, given a side (same side knights)" in {
+    val newBoard = board.place(Piece(Black, Knight)).at(position('f7))
+    (newBoard threatsTo Black at 'd8) must beEmpty
+    (newBoard threatsTo Black at 'h8) must beEmpty
+    (newBoard threatsTo Black at 'd6) must beEmpty
+    (newBoard threatsTo Black at 'h6) must beEmpty
+    (newBoard threatsTo Black at 'e5) must beEmpty
+    (newBoard threatsTo Black at 'g5) must beEmpty
+  }
+
+  "advise which positions currently threaten a given position, given a side (opposing kings)" in {
+    val newBoard = board.place(Piece(Black, King)).at(position('b4))
+    (newBoard threatsTo White at 'b3) must containPositions('b4)
+    (newBoard threatsTo White at 'b5) must containPositions('b4)
+    (newBoard threatsTo White at 'a3) must containPositions('b4)
+    (newBoard threatsTo White at 'a4) must containPositions('b4)
+    (newBoard threatsTo White at 'a5) must containPositions('b4)
+    (newBoard threatsTo White at 'c3) must containPositions('b4)
+    (newBoard threatsTo White at 'c4) must containPositions('b4)
+    (newBoard threatsTo White at 'c5) must containPositions('b4)
+  }
+
+  "advise which positions currently threaten a given position, given a side (same side kings)" in {
+    val newBoard = board.place(Piece(Black, King)).at(position('a3))
+    (newBoard threatsTo Black at 'a4) must beEmpty
+    (newBoard threatsTo Black at 'a2) must beEmpty
+    (newBoard threatsTo Black at 'b2) must beEmpty
+    (newBoard threatsTo Black at 'b3) must beEmpty
+    (newBoard threatsTo Black at 'b4) must beEmpty
+  }
+
 }
