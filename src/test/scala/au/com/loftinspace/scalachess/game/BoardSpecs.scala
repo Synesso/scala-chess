@@ -152,10 +152,120 @@ object BoardSpecs extends GameSpecification {
       newBoard unwind delta must_== afterMove
     }
 
-    "advise which positions from a given side currently threaten a given position (pawns)" in {
+    "advise which positions currently threaten a given position, given a side (opposing pawns)" in {
       val newBoard = board.place(Piece(White, Pawn)).at(position('f6))
       (newBoard threatsTo Black at 'g7) must containPositions('f6)
     }
 
+    "advise which positions currently threaten a given position, given a side (opposing non-threatening piece)" in {
+      val newBoard = board.place(Piece(White, Knight)).at(position('f6))
+      (newBoard threatsTo Black at 'g7) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (multiple pawn opponents)" in {
+      val newBoard = board.place(Piece(White, Pawn)).at(position('f6)).place(Piece(White, Pawn)).at(position('h6))
+      (newBoard threatsTo Black at 'g7) must containPositions('f6, 'h6)
+    }
+
+    "advise which positions currently threaten a given position, given a side (same side pawns)" in {
+      val newBoard = board.place(Piece(Black, Pawn)).at(position('f6))
+      (newBoard threatsTo Black at 'g7) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (opposing rooks)" in {
+      val newBoard = board.place(Piece(White, Rook)).at(position('b5))
+      (newBoard threatsTo Black at 'a5) must containPositions('b5)
+      (newBoard threatsTo Black at 'h5) must containPositions('b5)
+      (newBoard threatsTo Black at 'b8) must containPositions('b5)
+      (newBoard threatsTo Black at 'b1) must containPositions('b5)
+    }
+
+    "advise which positions currently threaten a given position, given a side (same side rooks)" in {
+      val newBoard = board.place(Piece(Black, Rook)).at(position('b5))
+      (newBoard threatsTo Black at 'a5) must beEmpty
+      (newBoard threatsTo Black at 'h5) must beEmpty
+      (newBoard threatsTo Black at 'b8) must beEmpty
+      (newBoard threatsTo Black at 'b1) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (eclipsed rook)" in {
+      val newBoard = board.place(Piece(White, Rook)).at(position('b5)).place(Piece(Black, Rook)).at(position('d5))
+      (newBoard threatsTo Black at 'e5) must beEmpty
+      (newBoard threatsTo Black at 'd5) must containPositions('b5)
+      (newBoard threatsTo Black at 'c5) must containPositions('b5)
+      (newBoard threatsTo Black at 'b5) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (opposing bishops)" in {
+      val newBoard = board.place(Piece(Black, Bishop)).at(position('f7))
+      (newBoard threatsTo White at 'g8) must containPositions('f7)
+      (newBoard threatsTo White at 'g6) must containPositions('f7)
+      (newBoard threatsTo White at 'e8) must containPositions('f7)
+      (newBoard threatsTo White at 'a2) must containPositions('f7)
+    }
+
+    "advise which positions currently threaten a given position, given a side (same side bishops)" in {
+      val newBoard = board.place(Piece(Black, Bishop)).at(position('d6))
+      (newBoard threatsTo Black at 'f4) must beEmpty
+      (newBoard threatsTo Black at 'f8) must beEmpty
+      (newBoard threatsTo Black at 'b8) must beEmpty
+      (newBoard threatsTo Black at 'b4) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (eclipsed bishops)" in {
+      val newBoard = board.place(Piece(White, Rook)).at(position('b5)).place(Piece(Black, Bishop)).at(position('d7))
+      (newBoard threatsTo White at 'a4) must beEmpty
+      (newBoard threatsTo White at 'b5) must containPositions('d7)
+      (newBoard threatsTo White at 'c6) must containPositions('d7)
+      (newBoard threatsTo White at 'd7) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (opposing queens on rank/file)" in {
+      val newBoard = board.place(Piece(White, Queen)).at(position('b5))
+      (newBoard threatsTo Black at 'a5) must containPositions('b5)
+      (newBoard threatsTo Black at 'h5) must containPositions('b5)
+      (newBoard threatsTo Black at 'b8) must containPositions('b5)
+      (newBoard threatsTo Black at 'b1) must containPositions('b5)
+    }
+
+    "advise which positions currently threaten a given position, given a side (same side queen on rank/file)" in {
+      val newBoard = board.place(Piece(Black, Queen)).at(position('b5))
+      (newBoard threatsTo Black at 'a5) must beEmpty
+      (newBoard threatsTo Black at 'h5) must beEmpty
+      (newBoard threatsTo Black at 'b8) must beEmpty
+      (newBoard threatsTo Black at 'b1) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (eclipsed queen on rank/file)" in {
+      val newBoard = board.place(Piece(White, Queen)).at(position('b5)).place(Piece(Black, Rook)).at(position('d5))
+      (newBoard threatsTo Black at 'e5) must beEmpty
+      (newBoard threatsTo Black at 'd5) must containPositions('b5)
+      (newBoard threatsTo Black at 'c5) must containPositions('b5)
+      (newBoard threatsTo Black at 'b5) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (opposing queens on diagonal)" in {
+      val newBoard = board.place(Piece(Black, Queen)).at(position('f7))
+      (newBoard threatsTo White at 'g8) must containPositions('f7)
+      (newBoard threatsTo White at 'g6) must containPositions('f7)
+      (newBoard threatsTo White at 'e8) must containPositions('f7)
+      (newBoard threatsTo White at 'a2) must containPositions('f7)
+    }
+
+    "advise which positions currently threaten a given position, given a side (same side queen on diagonal)" in {
+      val newBoard = board.place(Piece(Black, Queen)).at(position('d6))
+      (newBoard threatsTo Black at 'f4) must beEmpty
+      (newBoard threatsTo Black at 'f8) must beEmpty
+      (newBoard threatsTo Black at 'b8) must beEmpty
+      (newBoard threatsTo Black at 'b4) must beEmpty
+    }
+
+    "advise which positions currently threaten a given position, given a side (eclipsed queen on diagonal)" in {
+      val newBoard = board.place(Piece(White, Rook)).at(position('b5)).place(Piece(Black, Queen)).at(position('d7))
+      (newBoard threatsTo White at 'a4) must beEmpty
+      (newBoard threatsTo White at 'b5) must containPositions('d7)
+      (newBoard threatsTo White at 'c6) must containPositions('d7)
+      (newBoard threatsTo White at 'd7) must beEmpty
+    }
   }
 }

@@ -46,15 +46,42 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) { // todo - b
   def threatsTo(colour: Colour) = {
     case class Threat() {
       def at(s: Symbol): List[Position] = at(position(s))
-      def at(pos: Position): List[Position] = {
 
-        // check forward diagonals for opposing colour pawn
+      def at(pos: Position): List[Position] = {
+        def expand(direction: Seq[Option[Position] => Option[Position]]): Option[Position] = {
+          def next(from: Option[Position]): Option[Position] = {
+            val nextPose = direction.foldLeft(from) {(acc, next) => next(acc)}
+            if (nextPose.isEmpty) return None
+            if (pieces.contains(nextPose.get)) Some(nextPose.get) else next(nextPose)
+          }
+          next(Some(pos))
+        }
+
+        def opposing(r: Role) = {
+          case class OpposingRoleCheck() {
+            def at(p: Position) = pieces.get(p).map(_.equals(Piece(opposite of colour, r))).getOrElse(false)
+          }
+          new OpposingRoleCheck
+        }
+
+        val forward = if (White.equals(colour)) ^ _ else v _
+        val pawns: List[Position] = Set(forward(pos < 1), forward(pos > 1)).filter(_.isDefined).foldLeft(Nil: List[Position]) {
+          (acc, next) =>
+                  if (opposing(Pawn).at(next.get)) next.get :: acc else acc
+        }
+        val rankFileVectors: List[Position] = (expand(Seq(< _)) :: expand(Seq(^ _)) :: expand(Seq(> _)) :: expand(Seq(v _)) :: Nil)
+                .filter(_.isDefined).foldLeft(Nil: List[Position]) { (acc, next) =>
+                  if (opposing(Rook).at(next.get)|| opposing(Queen).at(next.get)) next.get :: acc else acc
+        }
+        val diagonalVectors: List[Position] = (expand(Seq(< _, ^ _)) :: expand(Seq(> _, ^ _)) :: expand(Seq(> _, v _)) :: expand(Seq(< _, v _)) :: Nil)
+                .filter(_.isDefined).foldLeft(Nil: List[Position]) { (acc, next) =>
+                  if (opposing(Bishop).at(next.get) || opposing(Queen).at(next.get)) next.get :: acc else acc
+        }
+
         // check surrounding 8 squares for opposing colour king
         // check surrounding 8 knight squares for opposing colour knight
-        // check file and ranks expansions for opposing rook or queen
-        // check diagonal expansions for opposing bishop or queen
 
-        Nil
+        pawns ::: rankFileVectors ::: diagonalVectors
       }
     }
     new Threat
@@ -100,7 +127,7 @@ case class Delta(pieces: Map[Position, (Option[Piece], Option[Piece])], taken: O
                 pieces(Position(4, first.file)).equals(None, Some(Piece(White, Pawn))) => Some(Position(4, first.file))
         case 4 if pieces.contains(Position(2, first.file)) &&
                 pieces(first).equals(None, Some(Piece(White, Pawn))) &&
-                pieces(Position(2, first.file)).equals(Some(Piece(White, Pawn)), None)  => Some(first)
+                pieces(Position(2, first.file)).equals(Some(Piece(White, Pawn)), None) => Some(first)
         case 5 if pieces.contains(Position(7, first.file)) &&
                 pieces(first).equals(None, Some(Piece(Black, Pawn))) &&
                 pieces(Position(7, first.file)).equals(Some(Piece(Black, Pawn)), None) => Some(first)
