@@ -88,15 +88,17 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) {
                   if (opposing(Pawn).at(next.get)) next.get :: acc else acc
         }
         val rankFileVectors: List[Position] = (expand(Seq(< _)) :: expand(Seq(^ _)) :: expand(Seq(> _)) :: expand(Seq(v _)) :: Nil)
-                .filter(_.isDefined).foldLeft(Nil: List[Position]) { (acc, next) =>
-                  if (opposing(Rook).at(next.get)|| opposing(Queen).at(next.get)) next.get :: acc else acc
+                .filter(_.isDefined).foldLeft(Nil: List[Position]) {
+          (acc, next) =>
+                  if (opposing(Rook).at(next.get) || opposing(Queen).at(next.get)) next.get :: acc else acc
         }
         val diagonalVectors: List[Position] = (expand(Seq(< _, ^ _)) :: expand(Seq(> _, ^ _)) :: expand(Seq(> _, v _)) :: expand(Seq(< _, v _)) :: Nil)
-                .filter(_.isDefined).foldLeft(Nil: List[Position]) { (acc, next) =>
+                .filter(_.isDefined).foldLeft(Nil: List[Position]) {
+          (acc, next) =>
                   if (opposing(Bishop).at(next.get) || opposing(Queen).at(next.get)) next.get :: acc else acc
         }
         val knights: List[Position] = {
-          val options = radialBasedPositions(pos, List(-2,-1,1,2), (rank, file) => Math.abs(rank) != Math.abs(file))
+          val options = radialBasedPositions(pos, List(-2, -1, 1, 2), (rank, file) => Math.abs(rank) != Math.abs(file))
           options.toList.filter(opposing(Knight).at(_))
         }
         val kings: List[Position] = {
@@ -127,30 +129,32 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) {
   }
 
   /**
-   * Alter the board to the previous state with the given delta.
+   * Alter the board to the previous state with the given history.
    * @return a new board
    */
-  def rewind(delta: Delta) = {
-    val oldPieces = delta.pieces.foldLeft(pieces) {
-      (acc, next) =>
-              if (next._2._1.isDefined) acc(next._1) = next._2._1.get else acc - next._1
+  def rewind(history: History) = {
+    history.implication match {
+      case Some(Take(p)) => new Board(
+        pieces - history.move.to + {history.move.from -> pieces(history.move.to)} + {p -> taken.head}, taken.tail)
+      case _ => new Board(pieces - history.move.to + {history.move.from -> pieces(history.move.to)}, taken)
     }
-    new Board(oldPieces, delta.taken.map(taken - _).getOrElse(taken))
   }
 
   /**
-   * Alter the board to a future state with the given delta.
+   * Alter the board to a future state with the given history.
    * @return a new board
    */
-  def unwind(delta: Delta) = {
-    val newPieces = delta.pieces.foldLeft(pieces) {
-      (acc, next) =>
-              if (next._2._2.isDefined) acc(next._1) = next._2._2.get else acc - next._1
+  def unwind(history: History) = {
+    history.implication match {
+      case Some(Take(p)) => new Board(
+        pieces - p - history.move.from + {history.move.to -> pieces(history.move.from)}, pieces(p) :: taken)
+      case _ => new Board(pieces - history.move.from + {history.move.to -> pieces(history.move.from)}, taken)
     }
-    new Board(newPieces, delta.taken.map(_ :: taken).getOrElse(taken))
   }
 
 }
+
+
 
 case class Delta(pieces: Map[Position, (Option[Piece], Option[Piece])], taken: Option[Piece]) {
   /**

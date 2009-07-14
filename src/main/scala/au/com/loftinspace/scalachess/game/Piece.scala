@@ -14,6 +14,7 @@ trait Colour
 case object White extends Colour
 case object Black extends Colour
 
+// todo - remove references to Delta
 case class Piece(colour: Colour, role: Role) {
   def opposingColour = opposite of colour
 
