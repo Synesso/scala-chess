@@ -163,29 +163,4 @@ object GameSpecs extends GameSpecification {
     }
 */
   }
-  case class imply(move: Move) extends Matcher[Move] {
-    def apply(m: => Move) = (move equals m, "expected " + move + " and got it", "expected " + move + ", but got " + m)
-  }
-}
-
-trait GameContexts extends SystemContexts {
-  val game = systemContext{ new Game }
-/*
-  val progressedGame = systemContext {
-    val game = new Game
-    game move 'e2 to 'e4
-    game move 'e7 to 'e5
-    game move 'd2 to 'd4
-    game move 'd7 to 'd5
-    game move 'g1 to 'f3
-    game move 'g8 to 'f6
-    game move 'b1 to 'c3
-    game move 'b8 to 'c6
-    game move 'f1 to 'c4
-    game move 'f8 to 'c5
-    game move 'c1 to 'f4
-    game move 'c8 to 'f5
-    game
-  }
-*/
 }
