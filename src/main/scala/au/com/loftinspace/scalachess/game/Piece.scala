@@ -67,7 +67,13 @@ case class Piece(colour: Colour, role: Role) {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
       if (capturing) (board take target) move pos to target else throw new IllegalMoveException("Cannot move " + this + " to " + target + " unless capturing")
     }
-    def castleImplication(board: Board, target: Position, history: List[History]) = board
+    def castleImplication(board: Board, target: Position, history: List[History]) = {
+      val (rookFrom: Position, rookTo: Position) = {
+        if (target.file < pos.file) (Position(pos.rank, 1), Position(pos.rank, 4))
+        else (Position(pos.rank, 8), Position(pos.rank, 6))
+      }
+      (board move pos to target) move rookFrom to rookTo
+    }
 
 
     val rookVectors = List(List(^ _), List(> _), List(v _), List(< _))

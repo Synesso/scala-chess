@@ -209,6 +209,36 @@ object KingSpec extends GameSpecification {
       }
     }
 
+    "invoke the correct board movements if the castling option is taken (black, queen-side)" in {
+      val board = new Board().place(king).at('e8).place(rook).at('a8)
+      val boardAfterMove = new Board().place(king).at('c8).place(rook).at('d8)
+      val implication = king.movesFrom(position('e8))(List(position('c8)))._2
+      implication(board, position('c8), Nil) must_== boardAfterMove
+    }
 
+    "invoke the correct board movements if the castling option is taken (black, king-side)" in {
+      val board = new Board().place(king).at('e8).place(rook).at('h8)
+      val boardAfterMove = new Board().place(king).at('g8).place(rook).at('f8)
+      val implication = king.movesFrom(position('e8))(List(position('g8)))._2
+      implication(board, position('g8), Nil) must_== boardAfterMove
+    }
+
+    "invoke the correct board movements if the castling option is taken (white, queen-side)" in {
+      val king = Piece(White, King)
+      val rook = Piece(White, Rook)
+      val board = new Board().place(king).at('e1).place(rook).at('a1)
+      val boardAfterMove = new Board().place(king).at('c1).place(rook).at('d1)
+      val implication = king.movesFrom(position('e1))(List(position('c1)))._2
+      implication(board, position('c1), Nil) must_== boardAfterMove
+    }
+
+    "invoke the correct board movements if the castling option is taken (white, king-side)" in {
+      val king = Piece(White, King)
+      val rook = Piece(White, Rook)
+      val board = new Board().place(king).at('e1).place(rook).at('h1)
+      val boardAfterMove = new Board().place(king).at('g1).place(rook).at('f1)
+      val implication = king.movesFrom(position('e1))(List(position('g1)))._2
+      implication(board, position('g1), Nil) must_== boardAfterMove
+    }
   }
 }
