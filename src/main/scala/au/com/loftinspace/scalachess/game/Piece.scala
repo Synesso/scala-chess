@@ -38,7 +38,18 @@ case class Piece(colour: Colour, role: Role) {
         if (onEnPassantRank && history.lastOption.map(h => h.move.isEnPassant && h.move.from.equals(from) && h.move.to.equals(to)).getOrElse(false)) IncludeAndStop else Stop
       }
     }
-    def castleQuery(board: Board, target: Position, history: List[History]) = IncludeAndStop
+    def castleQuery(board: Board, target: Position, history: List[History]): IterationControl = {
+      val rookPosition = if (target.file < pos.file) Position(pos.rank, 1) else Position(pos.rank, 8)
+      for (f <- Math.min(pos.file, rookPosition.file) until Math.max(pos.file, rookPosition.file); if (f != Math.min(pos.file, rookPosition.file))) {
+        if (board.pieces.contains(Position(pos.rank, f))) return Stop
+      }
+      for (f <- Math.min(pos.file, target.file) to Math.max(pos.file, target.file)) {
+        val threats = board.threatsTo(colour).at(Position(pos.rank, f))
+        if (threats.size > 0) return Stop
+      }
+      history.foreach(h => if (h.move.from.equals(pos) || h.move.from.equals(rookPosition)) return Stop)
+      IncludeAndStop
+    }
 
     def captureImplication(board: Board, target: Position, history: List[History]): Board = {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
