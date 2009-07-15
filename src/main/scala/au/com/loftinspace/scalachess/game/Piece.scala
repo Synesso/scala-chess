@@ -17,8 +17,8 @@ case object Black extends Colour
 case class Piece(colour: Colour, role: Role) {
   def opposingColour = opposite of colour
 
-  type BoardQuery = (Board, Position, Option[History]) => IterationControl
-  type Implication = (Board, Position, Option[History]) => Board
+  type BoardQuery = (Board, Position, List[History]) => IterationControl
+  type Implication = (Board, Position, List[History]) => Board
 
   /**
    * Find the moves this piece can make from the given position.
@@ -28,25 +28,25 @@ case class Piece(colour: Colour, role: Role) {
 
     val resultSeed = Map.empty[List[Position], (BoardQuery, Implication)]
 
-    def captureQuery(board: Board, target: Position, lastMove: Option[History]) =
+    def captureQuery(board: Board, target: Position, history: List[History]) =
       board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse(Continue)
-    def pawnForwardQuery(board: Board, target: Position, lastMove: Option[History]) = if (board.pieces.contains(target)) Stop else Continue
-    def pawnDiagonalQuery(board: Board, target: Position, lastMove: Option[History]) = {
+    def pawnForwardQuery(board: Board, target: Position, history: List[History]) = if (board.pieces.contains(target)) Stop else Continue
+    def pawnDiagonalQuery(board: Board, target: Position, history: List[History]) = {
       board.pieces.get(target).map(_.colour).map(col => if (col.equals(opposingColour)) IncludeAndStop else Stop).getOrElse {
         val onEnPassantRank = if (colour.equals(White)) pos.rank == 5 else pos.rank == 4
         val (to: Position, from: Position) = (Position(pos.rank, target.file), Position(if (colour.equals(White)) target.rank + 1 else target.rank - 1, target.file))
-        if (onEnPassantRank && lastMove.map(h => h.move.isEnPassant && h.move.from.equals(from) && h.move.to.equals(to)).getOrElse(false)) IncludeAndStop else Stop
+        if (onEnPassantRank && history.lastOption.map(h => h.move.isEnPassant && h.move.from.equals(from) && h.move.to.equals(to)).getOrElse(false)) IncludeAndStop else Stop
       }
     }
 
-    def captureImplication(board: Board, target: Position, lastMove: Option[History]): Board = {
+    def captureImplication(board: Board, target: Position, history: List[History]): Board = {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
       (if (capturing) (board take target) else board) move pos to target
     }
-    def pawnMoveOnlyIfEmptyImplication(board: Board, target: Position, lastMove: Option[History]): Board = board move pos to target
-    def pawnMoveOnlyIfCapturingImplication(board: Board, target: Position, lastMove: Option[History]): Board = {
+    def pawnMoveOnlyIfEmptyImplication(board: Board, target: Position, history: List[History]): Board = board move pos to target
+    def pawnMoveOnlyIfCapturingImplication(board: Board, target: Position, history: List[History]): Board = {
       val onEnPassantRank = if (colour.equals(White)) pos.rank == 5 else pos.rank == 4
-      lastMove.foreach {
+      history.lastOption.foreach {
         history =>
                 if (history.move.isEnPassant && history.move.to.equals(Position(pos.rank, target.file))) {
                   return (board take history.move.to) move pos to target

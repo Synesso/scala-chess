@@ -20,9 +20,9 @@ object PawnSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.filter(_.file.equals(4)).foreach {
                   position =>
-                          query(board, position, None) must_== Continue
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== Stop
+                          query(board, position, Nil) must_== Continue
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, Nil) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, Nil) must_== Stop
                 }
       }
     }
@@ -33,9 +33,9 @@ object PawnSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.filter(!_.file.equals(4)).foreach {
                   position =>
-                          query(board, position, None) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== IncludeAndStop
+                          query(board, position, Nil) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, Nil) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, Nil) must_== IncludeAndStop
                 }
       }
     }
@@ -49,9 +49,9 @@ object PawnSpec extends GameSpecification {
                           val boardAfterMove = new Board(Map(toPosition -> blackPawn), Nil)
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                          implication(board, toPosition, None) must_== boardAfterMove
-                          implication(boardWithWhitePieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(board, toPosition, Nil) must_== boardAfterMove
+                          implication(boardWithWhitePieceAtTarget, toPosition, Nil) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, Nil) must throwAn[IllegalMoveException]
                 }
       }
     }
@@ -65,9 +65,9 @@ object PawnSpec extends GameSpecification {
                           val boardAfterTaking = new Board(Map(toPosition -> blackPawn), List(Piece(White, Pawn)))
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                          implication(board, toPosition, None) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
-                          implication(boardWithWhitePieceAtTarget, toPosition, None) must_== boardAfterTaking
+                          implication(board, toPosition, Nil) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, Nil) must throwAn[IllegalMoveException]
+                          implication(boardWithWhitePieceAtTarget, toPosition, Nil) must_== boardAfterTaking
                 }
       }
     }
@@ -86,9 +86,9 @@ object PawnSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.filter(_.file.equals(4)).foreach {
                   position =>
-                          query(board, position, None) must_== Continue
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== Stop
+                          query(board, position, Nil) must_== Continue
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, Nil) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, Nil) must_== Stop
                 }
       }
     }
@@ -99,9 +99,9 @@ object PawnSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.filter(!_.file.equals(4)).foreach {
                   position =>
-                          query(board, position, None) must_== Stop
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== IncludeAndStop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== Stop
+                          query(board, position, Nil) must_== Stop
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, Nil) must_== IncludeAndStop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, Nil) must_== Stop
                 }
       }
     }
@@ -115,9 +115,9 @@ object PawnSpec extends GameSpecification {
                           val boardAfterMove = new Board(Map(toPosition -> whitePawn), Nil)
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                          implication(board, toPosition, None) must_== boardAfterMove
-                          implication(boardWithWhitePieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
+                          implication(board, toPosition, Nil) must_== boardAfterMove
+                          implication(boardWithWhitePieceAtTarget, toPosition, Nil) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, Nil) must throwAn[IllegalMoveException]
                 }
       }
     }
@@ -131,9 +131,9 @@ object PawnSpec extends GameSpecification {
                           val boardAfterTaking = new Board(Map(toPosition -> whitePawn), List(Piece(Black, Pawn)))
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
-                          implication(board, toPosition, None) must throwAn[IllegalMoveException]
-                          implication(boardWithWhitePieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition, None) must_== boardAfterTaking
+                          implication(board, toPosition, Nil) must throwAn[IllegalMoveException]
+                          implication(boardWithWhitePieceAtTarget, toPosition, Nil) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, Nil) must_== boardAfterTaking
                 }
       }
     }
@@ -167,37 +167,37 @@ object PawnSpec extends GameSpecification {
     "be able to perform en passant if the adjacent piece is a pawn that has moved two spaces in the last move" in {
       val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
       val lastMove = History(Move(whitePawn, position('c2), position('c4)), None)
-      query(board, position('c3), Some(lastMove)) must_== IncludeAndStop
+      query(board, position('c3), List(lastMove)) must_== IncludeAndStop
     }
 
     "not be able to perform en passant if the adjacent piece is a pawn that has not moved two spaces in the last move" in {
       val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
       val lastMove = History(Move(whitePawn, position('c3), position('c4)), None)
-      query(board, position('c3), Some(lastMove)) must_== Stop
+      query(board, position('c3), List(lastMove)) must_== Stop
     }
 
     "not be able to perform en passant if the adjacent piece is not a pawn" in {
       val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
       val lastMove = History(Move(Piece(White, Bishop), position('c3), position('c4)), None)
-      query(board, position('c3), Some(lastMove)) must_== Stop
+      query(board, position('c3), List(lastMove)) must_== Stop
     }
 
     "not be able to perform en passant if there is no adjacent piece" in {
       val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
       val lastMove = History(Move(Piece(White, Bishop), position('c3), position('c4)), None)
-      query(new Board().place(blackPawn).at('d4), position('c3), Some(lastMove)) must_== Stop
+      query(new Board().place(blackPawn).at('d4), position('c3), List(lastMove)) must_== Stop
     }
 
     "not be able to perform en passant if there is no prior move" in {
       val query = blackPawn.movesFrom(position('d4))(List(position('c3)))._1
-      query(new Board().place(blackPawn).at('d4), position('c3), None) must_== Stop
+      query(new Board().place(blackPawn).at('d4), position('c3), Nil) must_== Stop
     }
 
     "invoke the correct board movements if the en passant option is taken" in {
       val boardAfterMove = board.take(position('c4)).move(position('d4)).to(position('c3))
       val implication = blackPawn.movesFrom(position('d4))(List(position('c3)))._2
       val lastMove = History(Move(whitePawn, position('c2), position('c4)), None)
-      implication(board, position('c3), Some(lastMove)) must_== boardAfterMove
+      implication(board, position('c3), List(lastMove)) must_== boardAfterMove
     }
   }
   
@@ -207,37 +207,37 @@ object PawnSpec extends GameSpecification {
     "be able to perform en passant if the adjacent piece is a pawn that has moved two spaces in the last move" in {
       val query = whitePawn.movesFrom(position('d5))(List(position('c6)))._1
       val lastMove = History(Move(blackPawn, position('c7), position('c5)), None)
-      query(board, position('c6), Some(lastMove)) must_== IncludeAndStop
+      query(board, position('c6), List(lastMove)) must_== IncludeAndStop
     }
 
     "not be able to perform en passant if the adjacent piece is a pawn that has not moved two spaces in the last move" in {
       val query = whitePawn.movesFrom(position('d5))(List(position('c6)))._1
       val lastMove = History(Move(blackPawn, position('c6), position('c5)), None)
-      query(board, position('c6), Some(lastMove)) must_== Stop
+      query(board, position('c6), List(lastMove)) must_== Stop
     }
 
     "not be able to perform en passant if the adjacent piece is not a pawn" in {
       val query = whitePawn.movesFrom(position('d5))(List(position('c6)))._1
       val lastMove = History(Move(Piece(White, Bishop), position('c6), position('c5)), None)
-      query(board, position('c6), Some(lastMove)) must_== Stop
+      query(board, position('c6), List(lastMove)) must_== Stop
     }
 
     "not be able to perform en passant if there is no adjacent piece" in {
       val query = whitePawn.movesFrom(position('d5))(List(position('c6)))._1
       val lastMove = History(Move(Piece(White, Bishop), position('c6), position('c5)), None)
-      query(new Board().place(whitePawn).at('d5), position('c6), Some(lastMove)) must_== Stop
+      query(new Board().place(whitePawn).at('d5), position('c6), List(lastMove)) must_== Stop
     }
 
     "not be able to perform en passant if there is no prior move" in {
       val query = whitePawn.movesFrom(position('d5))(List(position('c6)))._1
-      query(new Board().place(whitePawn).at('d5), position('c6), None) must_== Stop
+      query(new Board().place(whitePawn).at('d5), position('c6), Nil) must_== Stop
     }
 
     "invoke the correct board movements if the en passant option is taken" in {
       val boardAfterMove = board.take(position('c5)).move(position('d5)).to(position('c6))
       val implication = whitePawn.movesFrom(position('d5))(List(position('c6)))._2
       val lastMove = History(Move(blackPawn, position('c7), position('c5)), None)
-      implication(board, position('c6), Some(lastMove)) must_== boardAfterMove
+      implication(board, position('c6), List(lastMove)) must_== boardAfterMove
     }
   }
 }

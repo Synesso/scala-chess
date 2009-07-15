@@ -24,9 +24,9 @@ object BishopSpec extends GameSpecification {
                 val query = element._2._1
                 element._1.foreach {
                   position =>
-                          query(board, position, None) must_== Continue
-                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, None) must_== IncludeAndStop
-                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, None) must_== Stop
+                          query(board, position, Nil) must_== Continue
+                          query(new Board(board.pieces(position) = Piece(Black, Pawn), Nil), position, Nil) must_== IncludeAndStop
+                          query(new Board(board.pieces(position) = Piece(White, Pawn), Nil), position, Nil) must_== Stop
                 }
       }
     }
@@ -41,9 +41,9 @@ object BishopSpec extends GameSpecification {
                           val boardWithBlackPieceAtTarget = new Board(board.pieces(toPosition) = Piece(Black, Pawn), Nil)
                           val boardWithWhitePieceAtTarget = new Board(board.pieces(toPosition) = Piece(White, Pawn), Nil)
                           val boardAfterPieceIsTaken = new Board(boardWithBishopAt(toPosition).pieces, Piece(Black, Pawn) :: Nil)
-                          implication(board, toPosition, None) must_== boardAfterMove
-                          implication(boardWithWhitePieceAtTarget, toPosition, None) must throwAn[IllegalMoveException]
-                          implication(boardWithBlackPieceAtTarget, toPosition, None) must_== boardAfterPieceIsTaken
+                          implication(board, toPosition, Nil) must_== boardAfterMove
+                          implication(boardWithWhitePieceAtTarget, toPosition, Nil) must throwAn[IllegalMoveException]
+                          implication(boardWithBlackPieceAtTarget, toPosition, Nil) must_== boardAfterPieceIsTaken
                 }
       }
     }
