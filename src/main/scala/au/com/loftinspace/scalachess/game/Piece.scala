@@ -38,6 +38,7 @@ case class Piece(colour: Colour, role: Role) {
         if (onEnPassantRank && history.lastOption.map(h => h.move.isEnPassant && h.move.from.equals(from) && h.move.to.equals(to)).getOrElse(false)) IncludeAndStop else Stop
       }
     }
+    def castleQuery(board: Board, target: Position, history: List[History]) = IncludeAndStop
 
     def captureImplication(board: Board, target: Position, history: List[History]): Board = {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
@@ -55,6 +56,7 @@ case class Piece(colour: Colour, role: Role) {
       val capturing = board.pieces.get(target).map(_.colour.equals(opposingColour)).getOrElse(false)
       if (capturing) (board take target) move pos to target else throw new IllegalMoveException("Cannot move " + this + " to " + target + " unless capturing")
     }
+    def castleImplication(board: Board, target: Position, history: List[History]) = board
 
 
     val rookVectors = List(List(^ _), List(> _), List(v _), List(< _))
@@ -72,7 +74,7 @@ case class Piece(colour: Colour, role: Role) {
         case White if (position('e1).equals(pos)) => Set(List(position('c1)), List(position('g1)))
         case _ => Set.empty[List[Position]]
       }
-      positions.foldLeft(resultSeed) {(acc, next) => acc(next) = (captureQuery, captureImplication)}
+      positions.foldLeft(resultSeed) {(acc, next) => acc(next) = (castleQuery, castleImplication)}
     }
 
     import Math.abs
