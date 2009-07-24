@@ -4,7 +4,19 @@ import scala.collection.immutable._
 import scala.util.matching.Regex
 import Positioning._
 
-class Game {
+case class Game(board: Board, history: List[History], players: Map[Colour, String], nextMove: Colour) {
+  def this() = this(new Board().reset, Nil, Map.empty, White)
+
+  def moves: Map[Position, Set[Position]] = Map.empty
+
+/*
+  {
+    for ((position, piece) <- board.pieces; if (nextMove.equals(piece.colour))) yield (position, piece.movesFrom(position))
+  }
+*/
+
+  def movesFrom(p: Position): Set[Position] = Set()
+
 /*
   private val CoordinatePattern = new Regex("^[a-h][1-8]$")
   private val LineUp = Rook :: Knight :: Bishop :: Queen :: King :: Bishop :: Knight :: Rook :: Nil
@@ -112,9 +124,3 @@ class Game {
 */
 }
 
-object Scenarios {
-  val WhiteKingsRookCastle = Map('e1->Some(Piece(White, King)), 'f1->None, 'g1->None, 'h1->Some(Piece(White, Rook)))
-  val WhiteQueensRookCastle = Map('e1->Some(Piece(White, King)), 'd1->None, 'c1->None, 'b1->None, 'a1->Some(Piece(White, Rook)))
-  val BlackKingsRookCastle = Map('e8->Some(Piece(Black, King)), 'f8->None, 'g8->None, 'h8->Some(Piece(Black, Rook)))
-  val BlackQueensRookCastle = Map('e8->Some(Piece(Black, King)), 'd8->None, 'c8->None, 'b8->None, 'a8->Some(Piece(Black, Rook)))
-}

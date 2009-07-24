@@ -6,7 +6,36 @@ import Positioning._
 
 object GameSpecs extends GameSpecification {
 
+  val game = new Game
+
   "a game" should {
+    "be created with default settings if the default constructor is used" in {
+      game.board must_== new Board().reset
+      game.history must beEmpty
+      game.players must beEmpty // todo - the constructor must take players
+      game.nextMove must_== White
+    }
+
+    "provide a list of available moves" in {
+      game.moves must_== Map(
+        position('a2) -> Set(position('a3), position('a4)),
+        position('b2) -> Set(position('b3), position('b4)),
+        position('c2) -> Set(position('c3), position('c4)),
+        position('d2) -> Set(position('d3), position('d4)),
+        position('e2) -> Set(position('e3), position('e4)),
+        position('f2) -> Set(position('f3), position('f4)),
+        position('g2) -> Set(position('g3), position('g4)),
+        position('h2) -> Set(position('h3), position('h4)),
+        position('b1) -> Set(position('a3), position('c3)),
+        position('g2) -> Set(position('f3), position('h3))
+      )
+    }
+
+    "provide a set of valid target positions for a given position" in {
+      game.movesFrom(position('a2)) must_== Set(position('a3), position('a4))
+    }
+
+
 /*
     "report what piece is at any coordinate".withA(game) { game =>
       val pawn = Piece(Black, Pawn)
