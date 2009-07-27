@@ -1,0 +1,53 @@
+.clear {
+    clear: both;
+}
+
+.piece {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    float: left;
+    text-align: center;
+    visibility: hidden;
+}
+
+.movable {
+    cursor: move;    
+}
+
+.highlight {
+    background: #FFCC33;
+}
+
+.mo {
+    background: #eee;
+}
+
+.locked {
+    cursor: default;
+    background: #fffea1;
+}
+
+.locked-border {
+    border: 1px solid #fc0;
+}
+
+.dark {
+    background: #9E7700;
+}
+
+.light {
+    background: #D8B04F;
+}
+
+.square {
+    width: 60px;
+    height: 60px;
+    float: left;
+}
+
+.end {
+    float: none;
+    height: 60px;
+}
+
