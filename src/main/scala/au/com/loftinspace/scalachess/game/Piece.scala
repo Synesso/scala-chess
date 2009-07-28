@@ -115,6 +115,8 @@ case class Piece(colour: Colour, role: Role) {
       case _ => resultSeed
     }
   }
+
+  override def toString = (colour + "_" + role).toLowerCase
 }
 
 trait IterationControl

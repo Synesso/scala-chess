@@ -1,5 +1,6 @@
 package au.com.loftinspace.scalachess.game
 
+import _root_.com.twitter.service.Json
 import Positioning._
 
 case class Board(pieces: Map[Position, Piece], taken: List[Piece]) {
@@ -151,4 +152,9 @@ case class Board(pieces: Map[Position, Piece], taken: List[Piece]) {
       case _ => new Board(pieces - history.move.from + {history.move.to -> pieces(history.move.from)}, taken)
     }
   }
+
+  /**
+   * Provide a JSON representation of the current state
+   */
+  def toJson = Json.build(Map('pieces.name -> pieces, 'taken.name -> taken)).toString
 }

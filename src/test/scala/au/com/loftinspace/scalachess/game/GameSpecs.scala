@@ -27,14 +27,13 @@ object GameSpecs extends GameSpecification {
         position('g2) -> Set(position('g3), position('g4)),
         position('h2) -> Set(position('h3), position('h4)),
         position('b1) -> Set(position('a3), position('c3)),
-        position('g2) -> Set(position('f3), position('h3))
+        position('g1) -> Set(position('f3), position('h3))
       )
     }
 
     "provide a set of valid target positions for a given position" in {
       game.movesFrom(position('a2)) must_== Set(position('a3), position('a4))
     }
-
 
 /*
     "report what piece is at any coordinate".withA(game) { game =>

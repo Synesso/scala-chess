@@ -4,13 +4,12 @@ import Positioning._
 import org.specs.Specification
 
 object BoardSpecs extends GameSpecification {
-
   val board = new Board
 
   "a board" should {
 
-    "have no pieces by default" in { board.pieces must beEmpty }
-    "have nothing taken by default" in { board.taken must beEmpty }
+    "have no pieces by default" in {board.pieces must beEmpty}
+    "have nothing taken by default" in {board.taken must beEmpty}
 
     "allow a piece to be placed" in {
       val updatedBoard = board place Piece(White, Rook) at 'e3
@@ -119,7 +118,7 @@ object BoardSpecs extends GameSpecification {
         position('f8) -> Piece(Black, Bishop),
         position('g8) -> Piece(Black, Knight),
         position('h8) -> Piece(Black, Rook)
-      )
+        )
     }
 
     "be able to be rewound to a prior state" in {
@@ -306,6 +305,14 @@ object BoardSpecs extends GameSpecification {
     (newBoard threatsTo Black at 'b2) must beEmpty
     (newBoard threatsTo Black at 'b3) must beEmpty
     (newBoard threatsTo Black at 'b4) must beEmpty
+  }
+
+  "generate the correct JSON when empty" in {
+    new Board().toJson must_== "{\"pieces\":{},\"taken\":[]}"
+  }
+
+  "generate the correct JSON with one piece" in {
+    new Board().place(Piece(Black, Queen)).at(Position(3, 5)).toJson must_== "{\"pieces\":{\"e3\":\"black_queen\"},\"taken\":[]}"
   }
 
 }
