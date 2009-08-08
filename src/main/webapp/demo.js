@@ -1,64 +1,100 @@
 var darkSquares = ['h1','h3','h5','h7','g2','g4','g6','g8','f1','f3','f5','f7','e2','e4','e6','e8','d1','d3','d5','d7','c2','c4','c6','c8','b1','b3','b5','b7','a2','a4','a6','a8'];
+var log = function(msg) {
+    console.log(msg);
+};
 window.addEvent('domready', function() {
     var piecesPerSquare = new Hash();
-    var squareClasses = new Hash();
-    var viableMoves = new Hash();
-
+    var dragEffects = new Hash();
     $('board').position();
-
     document.ondragstart = function () {
         return false;
     }; //IE drag hack
 
-    new Request.JSON({url: "board.json.jsp", onSuccess: function(board) {
+    // Place the pieces at their correct square on the board
+    var place = function(pieces) {
         var pieceCount = {};
-        for (var square in board.pieces) {
-            var piece = board.pieces[square];
+        for (var square in pieces) {
+            var piece = pieces[square];
             pieceCount[piece] = ($chk(pieceCount[piece])) ? pieceCount[piece] + 1 : 1;
             var pieceId = piece + '_' + pieceCount[piece];
-            $(pieceId).position({relativeTo: square});
-            $(pieceId).fade('in'); // todo - why doesn't this work?
+            log(square + "=" + pieceId);
+            $(pieceId).position({relativeTo: square}); // todo - stop pieces from flipping around due to random order of map
             piecesPerSquare.set(square, pieceId);
+            $(pieceId).fade('in'); // todo - why doesn't this work?
         }
-    }}).get({'game': 1});
-    new Request.JSON({url: "moves.json.jsp", onSuccess: function(movesRawHash) {
-        viableMoves = new Hash(movesRawHash);
-        viableMoves.each(function(to, from, hash) {
-            console.log('adding events to ' + from)
-            var toElements = []
-            to.each(function(dest, i, ary) {
-                toElements = toElements.include($(dest))
-            });
-            new Drag.Move($(piecesPerSquare.get(from)), {
-                droppables: toElements,
-                container: $('board'),
-                precalculate: true,
-                snap: 0,
-                onDrop: function(el, droppable) {
-                    if (!droppable) {
-                        var mover = new Fx.Move(el, {relativeTo: from});
-                        mover.chain(function() {el.setStyle('z-index', 'auto');});
-                        mover.start();
-                    } else {
-                        el.position({relativeTo: droppable});
-                        console.log('completed - todo: action next turn'); // todo
-                    };
-                }
-            });
-            $(piecesPerSquare.get(from)).addEvent('mousedown', function(square) {
+    };
+    // Remove the draggable effect from any pieces which are marked as draggable
+    var freezeAll = function() {
+        dragEffects.each(function(effect, from, dragHash) {
+            var fromPiece = $(piecesPerSquare.get(from));
+            log("removing events from " + piecesPerSquare.get(from) + " at " + from);
+            effect.detach();
+            fromPiece.removeEvents();
+            fromPiece.removeClass('movable');
+        });
+        dragEffects.empty();
+    };
+    // Enable dragging and draggable effects on movable pieces
+    var unfreeze = function(moves) {
+        new Hash(moves).each(function(to, from, hash) {
+            log(from + "=>" + to);
+            var fromPiece = $(piecesPerSquare.get(from));
+            fromPiece.addEvent('mousedown', function(square) {
                 to.each(function(dest, i, ary) {
                     $(piecesPerSquare.get(from)).setStyle('z-index', 1);
                     var morph = new Fx.Morph(dest, {duration: 400, transition: Fx.Transitions.Cubic.easeOut});
                     morph.start('.highlight');
                 });
             });
-            $(piecesPerSquare.get(from)).addEvent('mouseup', function(square) {
+            fromPiece.addEvent('mouseup', function(square) {
                 to.each(function(dest, i, ary) {
                     var morph = new Fx.Morph(dest, {duration: 400, transition: Fx.Transitions.Cubic.easeOut});
                     morph.start(darkSquares.contains(dest) ? '.dark' : '.light');
                 });
             });
-            $(piecesPerSquare.get(from)).addClass('movable');
+            fromPiece.addClass('movable');
+            var toElements = [];
+            to.each(function(dest, i, ary) {
+                toElements = toElements.include($(dest))
+            });
+            var dragMove = new Drag.Move(fromPiece, {
+                droppables: toElements,
+                container: $('board'),
+                precalculate: true,
+                snap: 5,
+                onDrop: function(el, droppable) {
+                    if (!droppable) {
+                        var mover = new Fx.Move(el, {relativeTo: from});
+                        mover.chain(function() {
+                            el.setStyle('z-index', '0');
+                        });
+                        mover.start();
+                    } else {
+                        el.position({relativeTo: droppable});
+                        freezeAll();
+                        log("Setting " + droppable.id + " -> " + piecesPerSquare.get(from));
+                        piecesPerSquare.set(droppable.id, piecesPerSquare.get(from));
+                        log("Removing " + from);
+                        piecesPerSquare.erase(from);
+                        submit(from, droppable.id);
+                    }
+                }
+            });
+            dragEffects.set(from, dragMove);
         });
-    }}).get({'game': 1});
+    };
+    // Transition the game board to the given state
+    var render = function(game) {
+        place(game.pieces);
+        unfreeze(game.moves);
+    };
+    // Submit the move from->to
+    var submit = function(from, to) {
+        log("Submitting move " + from + " to " + to);
+        new Request.JSON({url: "move.json.jsp", onSuccess: render}).get({
+            'game': 1, 'from': from, 'to': to
+        });
+    };
+    // Let's get this party started!
+    new Request.JSON({url: "game.json.jsp", onSuccess: render}).get({'game': 1});
 });

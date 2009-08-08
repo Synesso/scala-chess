@@ -29,12 +29,11 @@ case class Game(@BeanProperty board: Board, history: List[History], players: Map
     }
   }
 
-  /**
-   * Find all possible moves on the board during the next turn of play - in JSON format
-   */
-  def movesAsJson = {
-    Json.build(moves).toString
-  }
+  def toJson = Json.build(Map(
+    'moves.name -> moves,
+    'pieces.name -> board.pieces,
+    'taken.name -> board.taken,
+    'last.name -> history.firstOption.map(_.toJsonMap).getOrElse(null))).toString
 
   /**
    * Find all valid moves on the board from the given position for the next turn of play
@@ -65,6 +64,17 @@ case class Game(@BeanProperty board: Board, history: List[History], players: Map
         Set()
       }
     }
+  }
+
+  def move(from: String, to: String) = {
+    val opponent = opposite of nextMove
+    val piece = board.pieces(position(from))
+    val (newBoard, newHistory) = if (board.pieces.get(position(to)).map(_.colour.equals(opponent)).getOrElse(false)) {
+      ((board take position(to)) move position(from) to position(to), History(Move(piece, position(from), position(to)), Some(Take(position(to)))))
+    } else {
+      ((board move position(from) to position(to)), History(Move(piece, position(from), position(to)), None))
+    }
+    Game(newBoard, newHistory :: history, players, opponent)
   }
 
   /*

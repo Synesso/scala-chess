@@ -5,5 +5,4 @@
     Game game = Store.loadGame(1).move(request.getParameter("from"), request.getParameter("to"));
     Store.saveGame(1, game);
 %>
-<%= game.movesAsJson() %>
-
+<%= game.toJson() %>

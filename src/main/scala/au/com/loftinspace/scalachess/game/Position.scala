@@ -4,6 +4,7 @@ import scala.util.matching.Regex
 import Math.{abs,min,max}
 
 object Positioning {
+  def position(s: String): Position = position(Symbol(s))
   def position(s: Symbol): Position = position(coordinateToTuple(s))
   def position(rankAndFile: Tuple2[Int, Int]): Position = Position(rankAndFile._1, rankAndFile._2)
   def ^(p: Option[Position]): Option[Position] = p.flatMap(_ ^ 1)
