@@ -1,6 +1,6 @@
 var darkSquares = ['h1','h3','h5','h7','g2','g4','g6','g8','f1','f3','f5','f7','e2','e4','e6','e8','d1','d3','d5','d7','c2','c4','c6','c8','b1','b3','b5','b7','a2','a4','a6','a8'];
 var log = function(msg) {
-    console.log(msg);
+//    console.log(msg);
 };
 window.addEvent('domready', function() {
     var piecesPerSquare = new Hash();
@@ -83,15 +83,27 @@ window.addEvent('domready', function() {
             dragEffects.set(from, dragMove);
         });
     };
-    // Transition the game board to the given state
+    // Transition the entire game board to the given state
     var render = function(game) {
         place(game.pieces);
+        unfreeze(game.moves);
+    };
+    // Transition only the recently affected pieces to the given state
+    var renderChanged = function(game) {
+        if (game.last.taken == 'undefined') { // todo - how to check if a JSON element is present?
+            console.log("a piece was taken! " + game.last.taken);
+        } else {
+            console.log("no piece was taken" + game.last.taken);
+        }
+        // todo - castling
+        // todo - promotion
+        // todo - seems king in check doesn't work yet?
         unfreeze(game.moves);
     };
     // Submit the move from->to
     var submit = function(from, to) {
         log("Submitting move " + from + " to " + to);
-        new Request.JSON({url: "move.json.jsp", onSuccess: render}).get({
+        new Request.JSON({url: "move.json.jsp", onSuccess: renderChanged}).get({
             'game': 1, 'from': from, 'to': to
         });
     };
